@@ -35,19 +35,6 @@ PLT_APPS = \
 	crypto \
 	stdlib
 
-PLT_APPS = \
-	asn1 \
-	compiler \
-	crypto \
-	inets \
-	mnesia \
-	public_key \
-	runtime_tools \
-	ssl \
-	stdlib \
-	syntax_tools \
-	tools
-
 include $(if $(ERLANG_MK_FILENAME),$(ERLANG_MK_FILENAME),erlang.mk)
 
 app:: rebar.config
