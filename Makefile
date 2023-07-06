@@ -22,10 +22,10 @@ SHELL_DEPS = \
 	sync
 
 SHELL_OPTS = \
+	+pc unicode \
 	-config dev.config \
-	-s sync \
 	-enable-feature maybe_expr \
-	+pc unicode
+	-s sync
 
 EUNIT_ERL_OPTS = \
 	-enable-feature maybe_expr
