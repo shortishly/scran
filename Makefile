@@ -24,7 +24,11 @@ SHELL_DEPS = \
 SHELL_OPTS = \
 	-config dev.config \
 	-s sync \
+	-enable-feature maybe_expr \
 	+pc unicode
+
+EUNIT_ERL_OPTS = \
+	-enable-feature maybe_expr
 
 PLT_APPS = \
 	compiler \
