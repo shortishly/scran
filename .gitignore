@@ -19,6 +19,10 @@ _rel
 cover
 db
 deps
+doc/*.css
+doc/*.html
+doc/edoc-info
+doc/erlang.png
 ebin/*.beam
 ebin/test
 elvis
@@ -30,4 +34,5 @@ package-lock.json
 package.json
 relx
 test/*.beam
+test/ct.cover.spec
 xrefr

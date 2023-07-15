@@ -18,6 +18,8 @@ PROJECT = scran
 PROJECT_DESCRIPTION = Parser Combinators
 PROJECT_VERSION = 0.1.0
 
+COVER = 1
+
 SHELL_DEPS = \
 	sync
 
@@ -34,6 +36,8 @@ PLT_APPS = \
 	compiler \
 	crypto \
 	stdlib
+
+EDOC_OPTS = {preprocess, true}
 
 include $(if $(ERLANG_MK_FILENAME),$(ERLANG_MK_FILENAME),erlang.mk)
 

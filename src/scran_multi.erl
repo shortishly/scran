@@ -27,11 +27,17 @@
 
 %% Runs the embedded parser, gathering the results
 
+
+-spec many1(scran:parser(I, O)) -> scran:parser(I, [O, ...]).
+
 many1(Parser) ->
     fun
         (Input) ->
             ?FUNCTION_NAME(Parser, Input, [])
     end.
+
+
+-spec many1(scran:parser(I, O), I, [O]) -> scran:result(I, [O, ...]).
 
 many1(Parser, Input, A) ->
     ?LOG_DEBUG(#{input => Input,
@@ -51,6 +57,9 @@ many1(Parser, Input, A) ->
         nomatch ->
             {Input, lists:reverse(A)}
     end.
+
+
+-spec separated_list0(scran:parser(I, any()), scran:parser(I, Element)) -> scran:parser(I, [Element]).
 
 %% Alternates between two parsers to produce a list of elements
 separated_list0(SeparatorParser, ElementParser) ->
@@ -77,6 +86,8 @@ separated_list0(SeparatorParser, ElementParser) ->
             end
     end.
 
+
+-spec separated_list1(scran:parser(I, any()), scran:parser(I, Element)) -> scran:parser(I, [Element, ...]).
 
 %% Alternates between two parsers to produce a list of elements
 separated_list1(SeparatorParser, ElementParser) ->

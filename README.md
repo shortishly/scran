@@ -1,10 +1,16 @@
-# scran, text parser combinators
+# scran: text and binary parser combinators using maybe
 
 scran is a parser combinator library heavily influenced by
-[nom][nom-parser-combinators]. Unlike nom, scran isn't intended for
-binary parsing because we already have [bit syntax
-expressions][erlang-bit-syntax] in Erlang. Internally, scran uses the
-[maybe keyword, which is supported by OTP 25+][maybe-expression].
+[nom][nom-parser-combinators].
+
+Unlike nom, scran isn't primarily intended for binary parsing because
+we already have [bit syntax expressions][erlang-bit-syntax] in
+Erlang. However, it does have a small number of combinators for length
+encoded, or null terminated byte sequences (typically "strings"), 
+big/little integers with common bit sizes.
+
+Internally, scran uses the [maybe keyword, which is supported by OTP
+25+][maybe-expression].
 
 ## Example
 

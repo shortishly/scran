@@ -16,6 +16,7 @@
 -module(scran_tests).
 
 
+-import(scran_bits, [into_boolean/0]).
 -import(scran_branch, [alt/1]).
 -import(scran_branch, [permutation/1]).
 -import(scran_character_complete, [alpha0/0]).
@@ -46,6 +47,7 @@
 -import(scran_multi, [many1/1]).
 -import(scran_multi, [separated_list0/2]).
 -import(scran_multi, [separated_list1/2]).
+-import(scran_result, [into_bits/2]).
 -import(scran_sequence, [delimited/3]).
 -import(scran_sequence, [pair/2]).
 -import(scran_sequence, [preceded/2]).
@@ -406,6 +408,87 @@ none_of_test_() ->
        {nomatch, ""},
        {{"a", "z"}, "za"},
        {{<<"a">>, <<"z">>}, <<"za">>}]).
+
+i128_little_test_() ->
+    lists:map(
+      t(scran_number:i128(little)),
+      [{{<<>>,
+         16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d},
+        <<16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d:128/little>>},
+       {{<<>>,
+         -16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d},
+        <<-16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d:128/little>>}]).
+
+u_test_() ->
+    Endianess = [little, big],
+    Sizes = [8, 16, 24, 32, 40, 48, 56, 64, 72,
+             80, 88, 96, 104, 112, 120, 128],
+    lists:flatmap(
+      fun u/1,
+      [{Endian, Size} || Endian <- Endianess,
+                         Size <- Sizes]).
+
+u({Endianess, Size}) ->
+    lists:map(
+      t(scran_number:u(Endianess, Size)),
+      [{{<<>>, 0}, u(Endianess, Size, 0)},
+       {{<<>>, 1}, u(Endianess, Size, 1)},
+       {{<<>>, 1 bsl Size - 1}, u(Endianess, Size, 1 bsl Size - 1)},
+       {nomatch, <<>>},
+       {nomatch, u(Endianess, Size + 1, 1)},
+       {nomatch, u(Endianess, Size - 1, 1)}]).
+
+
+u(little, Size, Value) ->
+    <<Value:Size/little>>;
+u(big, Size, Value) ->
+    <<Value:Size/big>>.
+
+
+bytes_take_test_() ->
+    lists:map(
+      t(scran_bytes:take(6)),
+      [{{<<>>, <<"123456">>}, <<"123456">>},
+       {{<<"321">>, <<"123456">>}, <<"123456321">>},
+       {nomatch, <<"123">>}]).
+
+bytes_null_terminated_test_() ->
+    lists:map(
+      t(scran_bytes:null_terminated()),
+      [{{<<>>, <<"null">>}, <<"null", 0:8>>},
+       {nomatch, <<"missing null">>},
+       {{<<"terminated">>, <<"null">>}, <<"null", 0:8, "terminated">>}]).
+
+bytes_length_encoded_test_() ->
+    lists:map(
+      t(scran_bytes:length_encoded(scran_number_be:u16())),
+      [{{<<" World!">>, <<"Hello">>}, <<5:16, "Hello World!">>},
+       {nomatch, <<5:16, "He">>},
+       {nomatch, <<>>}]).
+
+result_into_bits_test_() ->
+    lists:map(
+      t(into_bits(scran_number_be:u16(), 16)),
+      [{{<<>>, <<5:16>>}, <<5:16>>},
+       {{<<"abc">>, <<5:16>>}, <<5:16, "abc">>},
+       {nomatch, <<5:8>>},
+       {nomatch, <<>>}]).
+
+bits_into_boolean_test_() ->
+    lists:map(
+      t(into_boolean()),
+      [{{<<>>, true}, <<1:1>>},
+       {{<<>>, false}, <<0:1>>},
+       {{<<0:1>>, true}, <<2#10:2>>},
+       {{<<1:1>>, false}, <<2#01:2>>},
+       {nomatch, <<>>}]).
+
+bits_into_many1_boolean_test_() ->
+    lists:map(
+      t(map_parser(into_bits(scran_number_be:u(3), 3),
+                   many1(into_boolean()))),
+      [{{<<>>, [true, false, true]}, <<2#101:3>>},
+       {{<<>>, [false, true, false]}, <<2#010:3>>}]).
 
 
 t(Parser) ->

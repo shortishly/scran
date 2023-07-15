@@ -13,27 +13,20 @@
 %% limitations under the License.
 
 
--module(scran).
+-module(scran_bits).
 
 
--feature(maybe_expr, enable).
+-export([into_boolean/0]).
 
 
--export_type([parser/0]).
--export_type([parser/2]).
--export_type([result/0]).
--export_type([result/2]).
--include_lib("kernel/include/logger.hrl").
+into_boolean() ->
+    fun
+        (<<0:1, Remaining/bits>>) ->
+            {Remaining, false};
 
+        (<<1:1, Remaining/bits>>) ->
+            {Remaining, true};
 
--type input() :: unicode:chardata()
-               | binary().
-
--type parser() :: parser(input(), result(input(), any())).
-
--type parser(I, O) :: fun((I) -> result(I, O)).
-
--type result() :: result(input(), input()).
-
--type result(I, O) :: {RemainingInput :: I, ProducedOutput :: O}
-                    | nomatch.
+        (_) ->
+            nomatch
+    end.

@@ -28,7 +28,7 @@
 -export([opt/1]).
 -export([peek/1]).
 -export([value/2]).
--export_type([mapper/0]).
+-export_type([mapper/1]).
 -include_lib("kernel/include/logger.hrl").
 
 
@@ -54,9 +54,9 @@ all_consuming(Parser) ->
 %% Maps a function on the result of a parser.
 %%
 
--type mapper() :: fun((unicode:chardata()) -> any()).
+-type mapper(O) :: fun((O) -> O).
 
--spec map_result(scran:parser(), mapper()) -> scran:parser().
+-spec map_result(scran:parser(I, O), mapper(O)) -> scran:parser(I, O).
 
 map_result(Parser, Function) ->
     fun
