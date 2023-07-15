@@ -34,9 +34,8 @@ jobs:
         with:
           otp-version: ${{matrix.otp}}
       - run: make edoc
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-pages-artifact@v1
         with:
-          name: github-pages
           path: doc
   deploy:
     needs: edoc
