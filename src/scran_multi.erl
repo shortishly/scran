@@ -24,9 +24,7 @@
 -include_lib("kernel/include/logger.hrl").
 
 
-
-%% Runs the embedded parser, gathering the results
-
+%% @doc Runs the embedded parser at least once, gathering the results.
 
 -spec many1(scran:parser(I, O)) -> scran:parser(I, [O, ...]).
 
@@ -59,9 +57,12 @@ many1(Parser, Input, A) ->
     end.
 
 
--spec separated_list0(scran:parser(I, any()), scran:parser(I, Element)) -> scran:parser(I, [Element]).
+%% @doc Alternates between two parsers to produce a possibly empty
+%% list of elements.
 
-%% Alternates between two parsers to produce a list of elements
+-spec separated_list0(scran:parser(I, any()),
+                      scran:parser(I, Element)) -> scran:parser(I, [Element]).
+
 separated_list0(SeparatorParser, ElementParser) ->
     fun
         (Input) ->
@@ -87,9 +88,13 @@ separated_list0(SeparatorParser, ElementParser) ->
     end.
 
 
--spec separated_list1(scran:parser(I, any()), scran:parser(I, Element)) -> scran:parser(I, [Element, ...]).
+%% @doc Alternates between two parsers to produce a non-empty list of
+%% elements.
 
-%% Alternates between two parsers to produce a list of elements
+-spec separated_list1(scran:parser(I, any()),
+                      scran:parser(I, Element)) ->
+          scran:parser(I, [Element, ...]).
+
 separated_list1(SeparatorParser, ElementParser) ->
     fun
         (Input) ->

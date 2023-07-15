@@ -13,6 +13,9 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators that return numbers from big or little
+%% endian bytes.
+
 -module(scran_number).
 
 -feature(maybe_expr, enable).
@@ -81,26 +84,77 @@
 -spec i120(endianess()) -> iparser().
 -spec i128(endianess()) -> iparser().
 
+
+%% @doc return a signed integer from an 8 bit little or big endian
+%% quantity.
 i8(Endianess) -> i(Endianess, 8).
+
+
+%% @doc return a signed integer from a 16 bit little or big endian
+%% quantity.
 i16(Endianess) -> i(Endianess, 16).
+
+
+%% @doc return a signed integer from a 24 bit little or big endian
+%% quantity.
 i24(Endianess) -> i(Endianess, 24).
+
+%% @doc return a signed integer from a 32 bit little or big endian
+%% quantity.
 i32(Endianess) -> i(Endianess, 32).
+
+%% @doc return a signed integer from a 40 bit little or big endian
+%% quantity.
 i40(Endianess) -> i(Endianess, 40).
+
+%% @doc return a signed integer from a 48 bit little or big endian
+%% quantity.
 i48(Endianess) -> i(Endianess, 48).
+
+%% @doc return a signed integer from a 56 bit little or big endian
+%% quantity.
 i56(Endianess) -> i(Endianess, 56).
+
+%% @doc return a signed integer from a 64 bit little or big endian
+%% quantity.
 i64(Endianess) -> i(Endianess, 64).
+
+%% @doc return a signed integer from a 72 bit little or big endian
+%% quantity.
 i72(Endianess) -> i(Endianess, 72).
+
+%% @doc return a signed integer from an 80 bit little or big endian
+%% quantity.
 i80(Endianess) -> i(Endianess, 80).
+
+%% @doc return a signed integer from an 88 bit little or big endian
+%% quantity.
 i88(Endianess) -> i(Endianess, 88).
+
+%% @doc return a signed integer from a 96 bit little or big endian
+%% quantity.
 i96(Endianess) -> i(Endianess, 96).
+
+%% @doc return a signed integer from a 104 bit little or big endian
+%% quantity.
 i104(Endianess) -> i(Endianess, 104).
+
+%% @doc return a signed integer from a 112 bit little or big endian
+%% quantity.
 i112(Endianess) -> i(Endianess, 112).
+
+%% @doc return a signed integer from a 120 bit little or big endian
+%% quantity.
 i120(Endianess) -> i(Endianess, 120).
+
+%% @doc return a signed integer from a 128 bit little or big endian
+%% quantity.
 i128(Endianess) -> i(Endianess, 128).
 
 
 -spec i(endianess(), bit_size()) -> iparser().
 
+%% @doc return a signed integer from a little or big endian quantity.
 i(Endianess, Size) -> int(Endianess, signed, Size).
 
 -type uparser() :: scran:parser(binary(), non_neg_integer()).
@@ -122,23 +176,74 @@ i(Endianess, Size) -> int(Endianess, signed, Size).
 -spec u120(endianess()) -> uparser().
 -spec u128(endianess()) -> uparser().
 
+
+%% @doc return an unsigned integer from an 8 bit little or big endian
+%% quantity.
 u8(Endianess) -> u(Endianess, 8).
+
+%% @doc return an unsigned integer from a 16 bit little or big endian
+%% quantity.
 u16(Endianess) -> u(Endianess, 16).
+
+%% @doc return an unsigned integer from a 24 bit little or big endian
+%% quantity.
 u24(Endianess) -> u(Endianess, 24).
+
+%% @doc return an unsigned integer from a 32 bit little or big endian
+%% quantity.
 u32(Endianess) -> u(Endianess, 32).
+
+%% @doc return an unsigned integer from a 40 bit little or big endian
+%% quantity.
 u40(Endianess) -> u(Endianess, 40).
+
+%% @doc return an unsigned integer from a 48 bit little or big endian
+%% quantity.
 u48(Endianess) -> u(Endianess, 48).
+
+%% @doc return an unsigned integer from a 56 bit little or big endian
+%% quantity.
 u56(Endianess) -> u(Endianess, 56).
+
+%% @doc return an unsigned integer from a 64 bit little or big endian
+%% quantity.
 u64(Endianess) -> u(Endianess, 64).
+
+%% @doc return an unsigned integer from a 72 bit little or big endian
+%% quantity.
 u72(Endianess) -> u(Endianess, 72).
+
+%% @doc return an unsigned integer from an 80 bit little or big endian
+%% quantity.
 u80(Endianess) -> u(Endianess, 80).
+
+%% @doc return an unsigned integer from an 88 bit little or big endian
+%% quantity.
 u88(Endianess) -> u(Endianess, 88).
+
+%% @doc return an unsigned integer from a 96 bit little or big endian
+%% quantity.
 u96(Endianess) -> u(Endianess, 96).
+
+%% @doc return an unsigned integer from a 104 bit little or big endian
+%% quantity.
 u104(Endianess) -> u(Endianess, 104).
+
+%% @doc return an unsigned integer from a 112 bit little or big endian
+%% quantity.
 u112(Endianess) -> u(Endianess, 112).
+
+%% @doc return an unsigned integer from a 120 bit little or big endian
+%% quantity.
 u120(Endianess) -> u(Endianess, 120).
+
+%% @doc return an unsigned integer from a 128 bit little or big endian
+%% quantity.
 u128(Endianess) -> u(Endianess, 128).
 
+
+%% @doc return an unsigned integer from a little or big endian
+%% quantity.
 
 -spec u(endianess(), bit_size()) -> uparser().
 

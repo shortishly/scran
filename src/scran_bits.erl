@@ -13,11 +13,18 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators that deal with bit inputs
+
 -module(scran_bits).
 
 
 -export([into_boolean/0]).
 
+
+%% @doc Takes 1 bit from the input converting it into a boolean.
+%% @returns A tuple of the remaining input and a boolean result.
+
+-spec into_boolean() -> scran:parser(<<_:1, _:_*1>>, boolean()).
 
 into_boolean() ->
     fun

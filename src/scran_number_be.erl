@@ -13,6 +13,8 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators that return numbers from big endian bytes.
+
 -module(scran_number_be).
 
 

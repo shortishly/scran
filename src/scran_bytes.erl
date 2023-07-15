@@ -13,6 +13,9 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators that deal with byte inputs
+
+
 -module(scran_bytes).
 
 
@@ -27,8 +30,8 @@
 -include_lib("kernel/include/logger.hrl").
 
 
-%% Take N bytes from the input, returning the remaining input and the
-%% taken bytes.
+%% @doc Take N bytes from the input, returning the remaining input and
+%% the taken bytes.
 
 -spec take(non_neg_integer()) -> scran:parser(binary(), binary()).
 
@@ -46,15 +49,18 @@ take(N) ->
     end.
 
 
-%% Read bytes from input until reaching a null byte, returning the
-%% remaining input and the bytes prior to the null (the null is
-%% discarded).
+%% @doc Read bytes from input until reaching a null byte (which is
+%% discarded), returning the remaining input and the bytes prior to
+%% the null.
 
 -spec null_terminated() -> scran:parser().
 
 null_terminated() ->
     split(<<0>>).
 
+
+%% @doc Split the input on the supplied binary pattern, returning the
+%% input before and leaving the remaining input after.
 
 -spec split(binary()) -> scran:parser().
 
@@ -72,6 +78,9 @@ split(Pattern) ->
     end.
 
 
+%% @doc Use the supplied parser to determine the length of the
+%% returned taken bytes.
+
 -spec length_encoded(scran_number:uparser()) -> scran:parser().
 
 length_encoded(LengthParser) ->
@@ -84,11 +93,14 @@ length_encoded(LengthParser) ->
     end.
 
 
+%% @doc Return the matching input.
+
 -spec tag(binary()) -> scran:parser().
 
 tag(Tag) ->
     fun
-        (<<Matched:(byte_size(Tag))/bytes, Remaining/bytes>>) when Tag == Matched ->
+        (<<Matched:(byte_size(Tag))/bytes, Remaining/bytes>>)
+          when Tag == Matched ->
             {Remaining, Tag};
 
         (_) ->

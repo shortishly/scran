@@ -13,6 +13,8 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators that map the result.
+
 -module(scran_result).
 
 
@@ -21,6 +23,8 @@
 -export([kv/2]).
 -import(scran_combinator, [map_result/2]).
 
+
+%% @doc Map the result into a tuple with the supplied key.
 
 -spec kv(any(), scran:parser(I, O)) -> scran:parser(I, {any(), O}).
 
@@ -37,6 +41,9 @@ kv(Key) ->
     end.
 
 
+%% @doc When the result is a list of key/value tuples it is converted
+%% into an Erlang map.
+
 -spec into_map(scran:parser(I, [{K, V}])) -> scran:parser(I, #{K => V}).
 
 into_map(Parser) ->
@@ -46,7 +53,10 @@ into_map(Parser) ->
     end.
 
 
--spec into_bits(scran:parser(I, integer()), pos_integer()) -> scran:parser(I, bitstring()).
+%% @doc The result is mapped into a bitstring of the supplied length.
+
+-spec into_bits(scran:parser(I, integer()),
+                pos_integer()) -> scran:parser(I, bitstring()).
 
 into_bits(Parser, Bits) ->
     fun

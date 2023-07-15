@@ -12,6 +12,7 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
+%% @doc Parser combinators that deal with unicode input.
 
 -module(scran_character_complete).
 
@@ -39,6 +40,8 @@
 -include_lib("kernel/include/logger.hrl").
 
 
+%% @doc Take a number of characters from the input.
+
 -spec take(pos_integer()) -> scran:parser().
 
 take(N) ->
@@ -55,11 +58,17 @@ take(N) ->
     end.
 
 
+%% @doc Return input that matches the supplied case sensitive regular
+%% expression.
+
 -spec re(iodata()) -> scran:parser().
 
 re(Regex) ->
     re(Regex, [anchored]).
 
+
+%% @doc Return input that matches the supplied case insensitive
+%% regular expression.
 
 -spec re_no_case(iodata()) -> scran:parser().
 
@@ -91,6 +100,8 @@ re(Regex, CompileOptions) ->
     end.
 
 
+%% @doc Return the matching case sensistive character data.
+
 -spec tag(unicode:chardata()) -> scran:parser().
 
 tag(Tag) ->
@@ -110,6 +121,9 @@ tag(Tag) ->
             end
     end.
 
+
+%% @doc Return the matching case insensistive character data.
+
 -spec tag_no_case(unicode:chardata()) -> scran:parser().
 
 tag_no_case(Tag) ->
@@ -124,10 +138,13 @@ tag_no_case(Tag) ->
                     nomatch;
 
                 _Remainder ->
-                    {string:slice(Input, string:length(Tag)), string:slice(Input, 0, string:length(Tag))}
+                    {string:slice(Input, string:length(Tag)),
+                     string:slice(Input, 0, string:length(Tag))}
             end
     end.
 
+
+%% @doc Return one of the matching characters.
 
 -spec one_of([unicode:chardata()]) -> scran:parser().
 
@@ -146,6 +163,9 @@ one_of(Choice) ->
                     nomatch
             end
     end.
+
+
+%% @doc Return the input if it is none of supplied characters.
 
 -spec none_of([unicode:chardata()]) -> scran:parser().
 
@@ -166,16 +186,23 @@ none_of(Choice) ->
     end.
 
 
-%% Recognizes zero or more lowercase and uppercase ASCII alphabetic
-%% characters: a-z, A-Z
+%% @doc Recognizes zero or more lowercase and uppercase ASCII
+%% alphabetic characters: a-z, A-Z.
+
+-spec alpha0() -> scran:parser().
+
 alpha0() ->
     fun
         (Input) ->
             (zero_or_more(alpha()))(Input)
     end.
 
-%% Recognizes one or more lowercase and uppercase ASCII alphabetic
-%% characters: a-z, A-Z
+
+%% @doc Recognizes one or more lowercase and uppercase ASCII
+%% alphabetic characters: a-z, A-Z.
+
+-spec alpha1() -> scran:parser().
+
 alpha1() ->
     fun
         (Input) ->
@@ -183,51 +210,80 @@ alpha1() ->
     end.
 
 
-%% Recognizes zero or more ASCII numerical and alphabetic characters:
-%% 0-9, a-z, A-Z
+%% @doc Recognizes zero or more ASCII numerical and alphabetic
+%% characters: 0-9, a-z, A-Z.
+
+-spec alphanumeric0() -> scran:parser().
+
 alphanumeric0() ->
     fun
         (Input) ->
             (zero_or_more(alphanumeric()))(Input)
     end.
 
-%% Recognizes one or more ASCII numerical and alphabetic characters:
-%% 0-9, a-z, A-Z
+
+%% @doc Recognizes one or more ASCII numerical and alphabetic characters:
+%% 0-9, a-z, A-Z.
+
+-spec alphanumeric1() -> scran:parser().
+
 alphanumeric1() ->
     fun
         (Input) ->
             (at_least_one(alphanumeric()))(Input)
     end.
 
-%% Recognizes zero or more ASCII numerical characters: 0-9
+
+%% @doc Recognizes zero or more ASCII numerical characters: 0-9.
+
+-spec digit0() -> scran:parser().
+
 digit0() ->
     fun
         (Input) ->
             (zero_or_more(numeric()))(Input)
     end.
 
-%% Recognizes one or more ASCII numerical characters: 0-9
+
+%% @doc Recognizes one or more ASCII numerical characters: 0-9.
+
+-spec digit1() -> scran:parser().
+
 digit1() ->
     fun
         (Input) ->
             (at_least_one(numeric()))(Input)
     end.
 
-%% Recognizes zero or more spaces, tabs, carriage returns and line
-%% feeds.
+
+%% @doc Recognizes zero or more spaces, tabs, carriage returns and
+%% line feeds.
+
+-spec multispace0() -> scran:parser().
+
 multispace0() ->
     fun
         (Input) ->
             (zero_or_more(whitespace()))(Input)
     end.
 
-%% Recognizes zero or more ASCII hexadecimal numerical characters:
-%% 0-9, A-F, a-f
+
+%% @doc Recognizes zero or more ASCII hexadecimal numerical
+%% characters: 0-9, A-F, a-f.
+
+-spec hex_digit0() -> scran:parser().
+
 hex_digit0() ->
     fun
         (Input) ->
             (zero_or_more(hex()))(Input)
     end.
+
+
+%% @doc Recognizes one or more ASCII hexadecimal numerical characters:
+%% 0-9, A-F, a-f.
+
+-spec hex_digit1() -> scran:parser().
 
 hex_digit1() ->
     fun
@@ -236,8 +292,11 @@ hex_digit1() ->
     end.
 
 
-%% Recognizes one or more spaces, tabs, carriage returns and line
+%% @doc Recognizes one or more spaces, tabs, carriage returns and line
 %% feeds.
+
+-spec multispace1() -> scran:parser().
+
 multispace1() ->
     fun
         (Input) ->

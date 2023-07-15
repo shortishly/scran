@@ -12,6 +12,7 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
+%% @doc Parser combinators that deal with branches.
 
 -module(scran_branch).
 
@@ -23,6 +24,9 @@
 -include_lib("kernel/include/logger.hrl").
 
 
+%% @doc Try each alternative parser in turn until one returns other
+%% than nomatch.
+
 -spec alt([scran:parser()]) -> scran:parser().
 
 alt(Alternatives) ->
@@ -31,6 +35,8 @@ alt(Alternatives) ->
             ?FUNCTION_NAME(Alternatives, Input)
     end.
 
+
+-spec alt([scran:parser()], scran:input()) -> scran:result().
 
 alt([Alternative | Alternatives], Input) ->
     ?LOG_DEBUG(#{alternative => scran_debug:pp(Alternative),
@@ -47,6 +53,9 @@ alt([Alternative | Alternatives], Input) ->
 alt([], _) ->
     nomatch.
 
+
+%% @doc Try each permutation of the supplied parsers until one returns
+%% other than nomatch.
 
 -spec permutation([scran:parser()]) -> scran:parser().
 

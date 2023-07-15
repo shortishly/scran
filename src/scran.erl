@@ -19,6 +19,7 @@
 -feature(maybe_expr, enable).
 
 
+-export_type([input/0]).
 -export_type([parser/0]).
 -export_type([parser/2]).
 -export_type([result/0]).
@@ -36,4 +37,5 @@
 -type result() :: result(input(), input()).
 
 -type result(I, O) :: {RemainingInput :: I, ProducedOutput :: O}
+                    | none
                     | nomatch.

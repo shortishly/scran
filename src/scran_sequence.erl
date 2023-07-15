@@ -13,6 +13,8 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators that operate on sequences of input.
+
 -module(scran_sequence).
 
 
@@ -28,10 +30,15 @@
 -include_lib("kernel/include/logger.hrl").
 
 
-%% Matches an object from the first parser and discards it, then gets
-%% an object from the second parser, and finally matches an object
-%% from the third parser and discards it.
+%% @doc Matches an object from the first parser and discards it, then
+%% gets an object from the second parser, and finally matches an
+%% object from the third parser and discards it.
 %%
+
+-spec delimited(scran:parser(),
+                scran:parser(),
+                scran:parser()) -> scran:parser().
+
 delimited(First, Second, Third) ->
     fun
         (Input) ->
@@ -49,9 +56,12 @@ delimited(First, Second, Third) ->
     end.
 
 
-%% Gets an object from the first parser, then gets another object from
-%% the second parser.
+%% @doc Gets an object from the first parser, then gets another object
+%% from the second parser.
 %%
+
+-spec pair(scran:parser(), scran:parser()) -> scran:parser().
+
 pair(First, Second) ->
     fun
         (Input) ->
@@ -68,9 +78,12 @@ pair(First, Second) ->
     end.
 
 
-%% Matches an object from the first parser and discards it, then gets
-%% an object from the second parser.
+%% @doc Matches an object from the first parser and discards it, then
+%% gets an object from the second parser.
 %%
+
+-spec preceded(scran:parser(), scran:parser()) -> scran:parser().
+
 preceded(First, Second) ->
     fun
         (Input) ->
@@ -87,10 +100,15 @@ preceded(First, Second) ->
     end.
 
 
-%% Gets an object from the first parser, then matches an object from
-%% the separator and discards it, then gets another object from the
-%% second parser.
+%% @doc Gets an object from the first parser, then matches an object
+%% from the separator and discards it, then gets another object from
+%% the second parser.
 %%
+
+-spec separated_pair(scran:parser(),
+                     scran:parser(),
+                     scran:parser()) -> scran:parser().
+
 separated_pair(First, Separator, Second) ->
     fun
         (Input) ->
@@ -109,9 +127,12 @@ separated_pair(First, Separator, Second) ->
     end.
 
 
-%% Gets an object from the first parser, then matches an object from
-%% the second parser and discards it.
+%% @doc Gets an object from the first parser, then matches an object
+%% from the second parser and discards it.
 %%
+
+-spec terminated(scran:parser(), scran:parser()) -> scran:parser().
+
 terminated(First, Second) ->
     fun
         (Input) ->
@@ -128,11 +149,19 @@ terminated(First, Second) ->
     end.
 
 
+%% @doc The input is applied to each step in the sequence.
+
+%% -spec sequence([scran:parser()]) -> scran:parser().
+
 sequence(Steps) ->
     fun
         (Input) ->
             ?FUNCTION_NAME(Steps, {Input, []})
     end.
+
+
+-spec sequence([scran:parser()],
+               {scran:input(), [scran:result()]}) -> scran:result().
 
 sequence([Step | Steps], {Input, Results}) ->
     case Step(Input) of
@@ -150,7 +179,9 @@ sequence([Step | Steps], {Input, Results}) ->
                          result => Result,
                          results => Results,
                          remaining => Remaining}),
-            ?FUNCTION_NAME(Steps, {Remaining, lists:reverse(Result) ++ Results});
+            ?FUNCTION_NAME(
+               Steps,
+               {Remaining, lists:reverse(Result) ++ Results});
 
         {Remaining, Result} when is_list(Result) ->
             ?LOG_DEBUG(#{step => scran_debug:pp(Step),

@@ -13,6 +13,8 @@
 %% limitations under the License.
 
 
+%% @doc Parser combinators.
+
 -module(scran_combinator).
 
 -feature(maybe_expr, enable).
@@ -32,7 +34,8 @@
 -include_lib("kernel/include/logger.hrl").
 
 
-%% Succeeds if all the input has been consumed by its child parser.
+%% @doc Succeeds if all the input has been consumed by its child
+%% parser.
 %%
 
 -spec all_consuming(scran:parser()) -> scran:parser().
@@ -51,8 +54,7 @@ all_consuming(Parser) ->
     end.
 
 
-%% Maps a function on the result of a parser.
-%%
+%% @doc Maps a function on the result of a parser.
 
 -type mapper(O) :: fun((O) -> O).
 
@@ -69,6 +71,8 @@ map_result(Parser, Function) ->
     end.
 
 
+%% @doc Ignore the result of the embedded parser.
+
 -spec ignore_result(scran:parser()) -> scran:parser().
 
 ignore_result(Parser) ->
@@ -79,8 +83,7 @@ ignore_result(Parser) ->
                end).
 
 
-
-%% Applies a parser over the result of another one.
+%% @doc Applies a parser over the result of another one.
 
 -spec map_parser(scran:parser(), scran:parser()) -> scran:parser().
 
@@ -96,7 +99,7 @@ map_parser(Parser, AppliedParser) ->
     end.
 
 
-%% Optional parser, will return none if the option is not taken.
+%% @doc Optional parser, will return none if the option is not taken.
 
 -spec opt(scran:parser()) -> scran:parser().
 
@@ -113,7 +116,7 @@ opt(Parser) ->
     end.
 
 
-%% Returns the provided value if the child parser succeeds.
+%% @doc Returns the provided value if the child parser succeeds.
 
 -spec value(any(), scran:parser()) -> scran:parser().
 
@@ -128,7 +131,7 @@ value(Return, Parser) ->
     end.
 
 
-%% Calls the parser if the condition is met.
+%% @doc Calls the parser if the condition is met.
 
 -spec condition(boolean(), scran:parser()) -> scran:parser().
 
@@ -149,8 +152,7 @@ condition(true, Parser) ->
     end.
 
 
-%% Tries to apply its parser without consuming the input.
-
+%% @doc Tries to apply its parser without consuming the input.
 
 -spec peek(scran:parser()) -> scran:parser().
 
@@ -167,7 +169,8 @@ peek(Parser) ->
             end
     end.
 
-%% Returns its input if it is at the end of input data.
+
+%% @doc Returns its input if it is at the end of input data.
 
 -spec eof() -> scran:parser().
 
@@ -184,7 +187,7 @@ eof() ->
     end.
 
 
-%% Succeeds if the child parser returns an error.
+%% @doc Succeeds if the child parser returns an error.
 
 -spec is_not(scran:parser()) -> scran:parser().
 
