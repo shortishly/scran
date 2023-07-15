@@ -21,6 +21,7 @@ db
 deps
 doc/*.css
 doc/*.html
+doc/*.md
 doc/edoc-info
 doc/erlang.png
 ebin/*.beam

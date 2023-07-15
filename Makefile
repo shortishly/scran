@@ -37,7 +37,8 @@ PLT_APPS = \
 	crypto \
 	stdlib
 
-EDOC_OPTS = {preprocess, true}
+DOC_DEPS = edown
+EDOC_OPTS = {doclet, edown_doclet},{preprocess, true}
 
 include $(if $(ERLANG_MK_FILENAME),$(ERLANG_MK_FILENAME),erlang.mk)
 
