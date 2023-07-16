@@ -21,7 +21,7 @@ jobs:
         with:
           otp-version: ${{matrix.otp}}
       - run: make all dialyze eunit
-  edoc:
+  site:
     needs: build
     strategy:
       matrix:
@@ -33,12 +33,12 @@ jobs:
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp}}
-      - run: make edoc
+      - run: make tests edoc
       - uses: actions/upload-pages-artifact@v1
         with:
-          path: doc
+          path: _site
   deploy:
-    needs: edoc
+    needs: site
     permissions:
       pages: write
       id-token: write

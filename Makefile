@@ -19,6 +19,7 @@ PROJECT_DESCRIPTION = Parser Combinators
 PROJECT_VERSION = 0.1.0
 
 COVER = 1
+COVER_REPORT_DIR = _site/cover
 
 SHELL_DEPS = \
 	sync
@@ -37,7 +38,7 @@ PLT_APPS = \
 	crypto \
 	stdlib
 
-EDOC_OPTS = {preprocess, true}
+EDOC_OPTS = {preprocess, true}, {dir, "_site/edoc"}
 
 include $(if $(ERLANG_MK_FILENAME),$(ERLANG_MK_FILENAME),erlang.mk)
 
