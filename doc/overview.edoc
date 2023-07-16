@@ -1,7 +1,32 @@
-** scran: text and binary parser combinators using maybe **
+-*- html -*-
 
 @author Peter Morgan <peter.james.morgan@gmail.com>
 @copyright 2023 Peter Morgan
 @version 1.0.0
 @title scran: text and binary parser combinators using maybe
-@doc scran: text and binary parser combinators
+
+@doc scran is a parser combinator library heavily influenced by
+<a href="https://github.com/rust-bakery/nom">nom</a>.
+
+Unlike nom, scran isn't primarily intended for binary parsing because
+we already have [bit syntax expressions][erlang-bit-syntax] in
+Erlang. However, it does have a small number of combinators for length
+encoded, or null terminated byte sequences (typically "strings"),
+big/little integers with common bit sizes.
+
+Internally, scran uses
+the <a href="https://www.erlang.org/doc/reference_manual/expressions.html#maybe">maybe
+keyword, which is supported by OTP 25+</a>.
+
+== Example ==
+
+Each parser returns a function that takes Unicode input, returning a
+tuple of the unmatched and matched input.
+
+```
+1> (scran_character_complete:tag("Hello"))("Hello, World!").
+{", World!","Hello"}
+'''
+
+Where `"Hello"' has been matched by `tag("Hello")' and `", World!"' is
+the remaining input.

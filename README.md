@@ -22,7 +22,7 @@ tuple of the unmatched and matched input.
 {", World!","Hello"}
 ```
 
-Where `"Hello"` has been matched by `tag("Hello")` and ", World!" is
+Where `"Hello"` has been matched by `tag("Hello")` and `", World!"' is
 the remaining input.
 
 ```erlang
