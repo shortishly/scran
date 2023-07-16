@@ -6,7 +6,7 @@ scran is a parser combinator library heavily influenced by
 Unlike nom, scran isn't primarily intended for binary parsing because
 we already have [bit syntax expressions][erlang-bit-syntax] in
 Erlang. However, it does have a small number of combinators for length
-encoded, or null terminated byte sequences (typically "strings"), 
+encoded, or null terminated byte sequences (typically "strings"),
 big/little integers with common bit sizes.
 
 Internally, scran uses the [maybe keyword, which is supported by OTP
@@ -274,7 +274,17 @@ The test cases are currently the best place to look at simple examples
 of the combinators. There is also a more complex example that is used
 to [parse part of the PostgreSQL grammar][github-com-pgsqlp].
 
+### coverage report
+
+Coverage report [is available here][scran-cover].
+
+### edoc
+
+edoc [is available here][scran-edoc].
+
 [erlang-bit-syntax]: https://www.erlang.org/doc/reference_manual/expressions.html#bit_syntax
 [github-com-pgsqlp]: https://github.com/shortishly/pgsqlp
 [maybe-expression]: https://www.erlang.org/doc/reference_manual/expressions.html#maybe
 [nom-parser-combinators]: https://github.com/rust-bakery/nom
+[scran-cover]: https://shortishly.github.io/scran/cover
+[scran-edoc]: https://shortishly.github.io/scran/edoc
