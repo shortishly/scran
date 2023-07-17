@@ -16,7 +16,7 @@
 
 PROJECT = scran
 PROJECT_DESCRIPTION = Parser Combinators
-PROJECT_VERSION = 0.1.0
+PROJECT_VERSION = ${shell git describe --tags}
 
 COVER = 1
 COVER_REPORT_DIR = _site/cover

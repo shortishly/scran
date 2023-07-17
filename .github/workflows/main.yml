@@ -34,6 +34,7 @@ jobs:
         with:
           otp-version: ${{matrix.otp}}
       - run: make tests edoc
+      - run: curl --proto '=https' --tlsv1.2 -sSf https://shortishly.github.io/coverdata/coverdata | escript coverdata --input cover/eunit.coverdata --output _site/coverage.json 
       - uses: actions/upload-pages-artifact@v1
         with:
           path: _site
