@@ -1,5 +1,17 @@
 # scran: text and binary parser combinators using maybe
 
+<p align="center">
+    <a href="https://shortishly.github.io/scran/cover/">
+        <img alt="Test Coverage" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fshortishly.github.io%2Fscran%2Fcover%2Fcoverage.json&query=%24.total&suffix=%25&style=flat-square&label=test%20coverage">
+    </a>
+    
+    <a href="https://shortishly.github.io/scran/edoc/">
+        <img alt="edoc" src="https://img.shields.io/badge/edoc-blue">
+    </a>
+</p>
+
+## What is scran?
+
 scran is a parser combinator library heavily influenced by
 [nom][nom-parser-combinators].
 
