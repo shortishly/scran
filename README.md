@@ -2,10 +2,10 @@
 
 <p align="center">
     <a href="https://shortishly.github.io/scran/cover/">
-      <img alt="Test Coverage" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fshortishly.github.io%2Fscran%2Fcover%2Fcoverage.json&query=%24.total&suffix=%25&style=flat-square&label=test%20coverage">
+      <img alt="Test Coverage" src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fshortishly.github.io%2Fscran%2Fcover%2Fcoverage.json&query=%24.total&style=flat-square&label=Test%20Coverage&color=green">
     </a>
     <a href="https://shortishly.github.io/scran/edoc/">
-      <img alt="edoc" src="https://img.shields.io/badge/edoc-green?style=flat-square">
+      <img alt="edoc" src="https://img.shields.io/badge/Documentation-edoc-green?style=flat-square">
     </a>
     <img alt="Erlang/OTP 25+" src="https://img.shields.io/badge/Erlang%2FOTP-25%2B-green?style=flat-square">
 </p>
