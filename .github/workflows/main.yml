@@ -34,7 +34,7 @@ jobs:
         with:
           otp-version: ${{matrix.otp}}
       - run: make tests edoc
-      - run: bin/coverdata --input cover/eunit.coverdata --output _site/coverage.json
+      - run: bin/coverdata --input _site/cover/eunit.coverdata --output _site/cover/coverage.json --precision 3
       - uses: actions/upload-pages-artifact@v1
         with:
           path: _site
