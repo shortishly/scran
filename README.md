@@ -7,8 +7,12 @@
     <a href="https://shortishly.github.io/scran/edoc/">
       <img alt="edoc" src="https://img.shields.io/badge/Documentation-edoc-green?style=flat-square">
     </a>
-    <img alt="Erlang/OTP 25+" src="https://img.shields.io/badge/Erlang%2FOTP-25%2B-green?style=flat-square">
-    <img alt="Apache-2.0" src="https://img.shields.io/github/license/shortishly/scran?style=flat-square">
+    <a href="https://erlang.org/">
+      <img alt="Erlang/OTP 25+" src="https://img.shields.io/badge/Erlang%2FOTP-25%2B-green?style=flat-square">
+    </a>
+    <a href="https://www.apache.org/licenses/LICENSE-2.0">
+      <img alt="Apache-2.0" src="https://img.shields.io/github/license/shortishly/scran?style=flat-square">
+    </a>
 </p>
 
 ## What is scran?
