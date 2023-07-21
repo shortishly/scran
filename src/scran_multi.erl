@@ -43,10 +43,7 @@ many1(Parser, Input, A) ->
                  parser => scran_debug:pp(Parser)}),
 
     case Parser(Input) of
-        {Remaining, none} ->
-            ?FUNCTION_NAME(Parser, Remaining, A);
-
-        {Remaing, Result} ->
+        {Remaing, Result} when Result /= none ->
             ?FUNCTION_NAME(Parser, Remaing, [Result | A]);
 
         nomatch when A == [] ->
