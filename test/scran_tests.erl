@@ -32,6 +32,7 @@
 -import(scran_character_complete, [none_of/1]).
 -import(scran_character_complete, [one_of/1]).
 -import(scran_character_complete, [re/1]).
+-import(scran_character_complete, [re_no_case/1]).
 -import(scran_character_complete, [tag/1]).
 -import(scran_character_complete, [tag_no_case/1]).
 -import(scran_character_complete, [take/1]).
@@ -47,7 +48,14 @@
 -import(scran_multi, [many1/1]).
 -import(scran_multi, [separated_list0/2]).
 -import(scran_multi, [separated_list1/2]).
+-import(scran_result, [into_atom/1]).
 -import(scran_result, [into_bits/2]).
+-import(scran_result, [into_existing_atom/1]).
+-import(scran_result, [into_integer/1]).
+-import(scran_result, [into_map/1]).
+-import(scran_result, [into_snake_case/1]).
+-import(scran_result, [kv/2]).
+-import(scran_result, [ignore/1]).
 -import(scran_sequence, [delimited/3]).
 -import(scran_sequence, [pair/2]).
 -import(scran_sequence, [preceded/2]).
@@ -419,29 +427,164 @@ i128_little_test_() ->
          -16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d},
         <<-16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d:128/little>>}]).
 
-u_test_() ->
-    Endianess = [little, big],
-    Sizes = [8, 16, 24, 32, 40, 48, 56, 64, 72,
-             80, 88, 96, 104, 112, 120, 128],
+
+number_bit_sizes() ->
+    [8, 16, 24, 32, 40, 48, 56, 64, 72,
+     80, 88, 96, 104, 112, 120, 128].
+
+
+u2_test_() ->
+    u(fun scran_number:u/2, [little, big], number_bit_sizes()).
+
+u1_test_() ->
+    u(fun
+          (Endian, Size) ->
+              M = scran_number,
+              F = list_to_atom([$u | integer_to_list(Size)]),
+              M:F(Endian)
+      end,
+      [little, big],
+      number_bit_sizes()).
+
+u1_be_test_() ->
+    Endianess = big,
+    u(fun
+          (Endian, Size) when Endian == Endianess ->
+              scran_number_be:u(Size)
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+u0_be_test_() ->
+    Endianess = big,
+    u(fun
+          (Endian, Size) when Endian == Endianess ->
+              M = scran_number_be,
+              F = list_to_atom([$u | integer_to_list(Size)]),
+              M:F()
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+u1_le_test_() ->
+    Endianess = little,
+    u(fun
+          (Endian, Size) when Endian == Endianess ->
+              scran_number_le:u(Size)
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+u0_le_test_() ->
+    Endianess = little,
+    u(fun
+          (Endian, Size) when Endian == Endianess ->
+              M = scran_number_le,
+              F = list_to_atom([$u | integer_to_list(Size)]),
+              M:F()
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+
+u(F, Endianess, Sizes) ->
     lists:flatmap(
-      fun u/1,
+      ?FUNCTION_NAME(F),
       [{Endian, Size} || Endian <- Endianess,
-                         Size <- Sizes]).
+                                    Size <- Sizes]).
 
-u({Endianess, Size}) ->
-    lists:map(
-      t(scran_number:u(Endianess, Size)),
-      [{{<<>>, 0}, u(Endianess, Size, 0)},
-       {{<<>>, 1}, u(Endianess, Size, 1)},
-       {{<<>>, 1 bsl Size - 1}, u(Endianess, Size, 1 bsl Size - 1)},
-       {nomatch, <<>>},
-       {nomatch, u(Endianess, Size + 1, 1)},
-       {nomatch, u(Endianess, Size - 1, 1)}]).
+u(F) ->
+    fun
+        ({Endianess, Size}) ->
+            lists:map(
+              t(F(Endianess, Size)),
+              [{{<<>>, 0}, bits(Endianess, Size, 0)},
+               {{<<>>, 1}, bits(Endianess, Size, 1)},
+               {{<<>>, 1 bsl Size - 1}, bits(Endianess, Size, 1 bsl Size - 1)},
+               {nomatch, <<>>},
+               {nomatch, bits(Endianess, Size + 1, 1)},
+               {nomatch, bits(Endianess, Size - 1, 1)}])
+    end.
 
 
-u(little, Size, Value) ->
+i2_test_() ->
+    i(fun scran_number:i/2, [little, big], number_bit_sizes()).
+
+i1_test_() ->
+    i(fun
+          (Endian, Size) ->
+              M = scran_number,
+              F = list_to_atom([$i | integer_to_list(Size)]),
+              M:F(Endian)
+      end,
+      [little, big],
+      number_bit_sizes()).
+
+i0_be_test_() ->
+    Endianess = big,
+    i(fun
+          (Endian, Size) when Endian == Endianess ->
+              M = scran_number_be,
+              F = list_to_atom([$i | integer_to_list(Size)]),
+              M:F()
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+i1_be_test_() ->
+    Endianess = big,
+    i(fun
+          (Endian, Size) when Endian == Endianess ->
+              scran_number_be:i(Size)
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+i1_le_test_() ->
+    Endianess = little,
+    i(fun
+          (Endian, Size) when Endian == Endianess ->
+              scran_number_le:i(Size)
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+i0_le_test_() ->
+    Endianess = little,
+    i(fun
+          (Endian, Size) when Endian == Endianess ->
+              M = scran_number_le,
+              F = list_to_atom([$i | integer_to_list(Size)]),
+              M:F()
+      end,
+      [Endianess],
+      number_bit_sizes()).
+
+i(F, Endianess, Sizes) ->
+    lists:flatmap(
+      ?FUNCTION_NAME(F),
+      [{Endian, Size} || Endian <- Endianess,
+                                    Size <- Sizes]).
+
+i(F) ->
+    fun
+        ({Endianess, Size}) ->
+            lists:map(
+              t(F(Endianess, Size)),
+              [{{<<>>, -1 bsl (Size - 1)}, bits(Endianess, Size, -1 bsl (Size - 1))},
+               {{<<>>, -1}, bits(Endianess, Size, (1 bsl Size) - 1)},
+               {{<<>>, 0}, bits(Endianess, Size, 0)},
+               {{<<>>, 1}, bits(Endianess, Size, 1)},
+               {{<<>>, 1 bsl (Size - 1) - 1}, bits(Endianess, Size, 1 bsl (Size - 1) - 1)},
+               {nomatch, <<>>},
+               {nomatch, bits(Endianess, Size + 1, 1)},
+               {nomatch, bits(Endianess, Size - 1, 1)}])
+    end.
+
+
+bits(little, Size, Value) ->
     <<Value:Size/little>>;
-u(big, Size, Value) ->
+bits(big, Size, Value) ->
     <<Value:Size/big>>.
 
 
@@ -450,6 +593,13 @@ bytes_take_test_() ->
       t(scran_bytes:take(6)),
       [{{<<>>, <<"123456">>}, <<"123456">>},
        {{<<"321">>, <<"123456">>}, <<"123456321">>},
+       {nomatch, <<"123">>}]).
+
+bytes_tag_test_() ->
+    lists:map(
+      t(scran_bytes:tag(<<"abc">>)),
+      [{{<<"123">>, <<"abc">>}, <<"abc123">>},
+       {{<<>>, <<"abc">>}, <<"abc">>},
        {nomatch, <<"123">>}]).
 
 bytes_null_terminated_test_() ->
@@ -490,6 +640,69 @@ bits_into_many1_boolean_test_() ->
       [{{<<>>, [true, false, true]}, <<2#101:3>>},
        {{<<>>, [false, true, false]}, <<2#010:3>>}]).
 
+kv_test_() ->
+    lists:map(
+      t(kv(action, alpha1())),
+      [{{[], {action, "SELECT"}}, "SELECT"},
+       {nomatch, "123"}]).
+
+into_snake_case_test_() ->
+    lists:map(
+      t(kv(join_type,
+           into_snake_case(
+             alt([re_no_case("(INNER )?JOIN"),
+                  re_no_case("LEFT (OUTER )?JOIN"),
+                  re_no_case("RIGHT (OUTER )?JOIN"),
+                  re_no_case("FULL (OUTER )?JOIN")])))),
+      [{{[], {join_type, "join"}}, "join"},
+       {{<<>>, {join_type, <<"join">>}}, <<"JOIN">>},
+       {{[], {join_type, "inner_join"}}, "inner join"},
+       {{<<>>, {join_type, <<"inner_join">>}}, <<"INNER JOIN">>},
+       {{[], {join_type, "left_join"}}, "left join"},
+       {{<<>>, {join_type, <<"left_join">>}}, <<"LEFT JOIN">>},
+       {{[], {join_type, "left_outer_join"}}, "left outer join"},
+       {{<<>>, {join_type, <<"left_outer_join">>}}, <<"LEFT OUTER JOIN">>},
+       {nomatch, "123"}]).
+
+into_atom_test_() ->
+    lists:map(
+      t(into_atom(alpha1())),
+      [{{[], join}, "join"},
+      {{<<>>, join}, <<"join">>}]).
+
+into_existing_atom_test_() ->
+    lists:map(
+      t(into_existing_atom(alpha1())),
+      [{{[], join}, "join"},
+       {{<<>>, join}, <<"join">>},
+       {nomatch, alpha(5)}]).
+
+into_map_test_() ->
+    lists:map(
+      t(into_map(
+          separated_pair(kv(k, alpha1()),
+                         tag("="),
+                         kv(v, digit1())))),
+      [{{[], #{k => "abc", v => "123"}}, "abc=123"},
+       {nomatch, "abc"}]).
+
+
+into_integer_test_() ->
+    lists:map(
+      t(into_integer(digit1())),
+      [{{"abc", 123}, "123abc"},
+       {{<<"abc">>, 123}, <<"123abc">>},
+       {nomatch, "abc123"}]).
+
+result_ignore_test_() ->
+    lists:map(
+      t(into_map(
+          sequence(
+            [kv(k, alpha1()),
+             ignore(tag("=")),
+             kv(v, digit1())]))),
+      [{{[], #{k => "abc", v => "123"}}, "abc=123"},
+       {nomatch, "abc"}]).
 
 t(Parser) ->
     fun
@@ -500,3 +713,18 @@ t(Parser) ->
 
 nm(Test) ->
     iolist_to_binary(io_lib:fwrite("~p", [Test])).
+
+alpha(N) ->
+    list_to_binary(pick(N, lists:seq($a, $z))).
+
+pick(N, Pool) ->
+    ?FUNCTION_NAME(N, Pool, []).
+
+
+pick(0, _, A) ->
+    A;
+
+pick(N, Pool, A) ->
+    ?FUNCTION_NAME(N - 1,
+                   Pool,
+                   [lists:nth(rand:uniform(length(Pool)), Pool) | A]).

@@ -12,12 +12,16 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
+%% @doc Pretty print function closures when using scran internal logging.
 
 -module(scran_debug).
 
 
 -export([pp/1]).
 -include_lib("kernel/include/logger.hrl").
+
+
+%% @doc Pretty print a function closure.
 
 -spec pp(function()) -> io_lib:chars() | binary().
 
