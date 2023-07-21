@@ -72,15 +72,12 @@ map_result(Parser, Function) ->
 
 
 %% @doc Ignore the result of the embedded parser.
+%% @deprecated Please use {@link scran_result:ignore/1} instead.
 
 -spec ignore_result(scran:parser()) -> scran:parser().
 
 ignore_result(Parser) ->
-    map_result(Parser,
-               fun
-                   (_) ->
-                       none
-               end).
+    scran_result:ignore(Parser).
 
 
 %% @doc Applies a parser over the result of another one.
