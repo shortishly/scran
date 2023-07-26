@@ -26,6 +26,7 @@
 -export([into_integer/2]).
 -export([into_map/1]).
 -export([into_snake_case/1]).
+-export([into_tuple/1]).
 -export([kv/2]).
 -import(scran_combinator, [map_result/2]).
 
@@ -145,6 +146,18 @@ into_map(Parser) ->
     fun
         (Input) ->
             (map_result(Parser, fun maps:from_list/1))(Input)
+    end.
+
+
+%% @doc When the parser result is a list of terms it is converted into
+%% a tuple.
+
+-spec into_tuple(scran:parser(I, [term()])) -> scran:parser(I, tuple()).
+
+into_tuple(Parser) ->
+    fun
+        (Input) ->
+            (map_result(Parser, fun erlang:list_to_tuple/1))(Input)
     end.
 
 

@@ -16,6 +16,8 @@
 -module(scran_tests).
 
 
+
+-define(T(Parser), fun ({Expected, Input} = Test) -> {nm(Test), ?_assertEqual(Expected, (Parser)(Input))} end).
 -import(scran_bits, [into_boolean/0]).
 -import(scran_branch, [alt/1]).
 -import(scran_branch, [permutation/1]).
@@ -48,14 +50,15 @@
 -import(scran_multi, [many1/1]).
 -import(scran_multi, [separated_list0/2]).
 -import(scran_multi, [separated_list1/2]).
+-import(scran_result, [ignore/1]).
 -import(scran_result, [into_atom/1]).
 -import(scran_result, [into_bits/2]).
 -import(scran_result, [into_existing_atom/1]).
 -import(scran_result, [into_integer/1]).
 -import(scran_result, [into_map/1]).
 -import(scran_result, [into_snake_case/1]).
+-import(scran_result, [into_tuple/1]).
 -import(scran_result, [kv/2]).
--import(scran_result, [ignore/1]).
 -import(scran_sequence, [delimited/3]).
 -import(scran_sequence, [pair/2]).
 -import(scran_sequence, [preceded/2]).
@@ -67,7 +70,7 @@
 
 one_of_test_() ->
     lists:map(
-      t(one_of("abc")),
+      ?T(one_of("abc")),
       [{{[], "b"}, "b"},
        {{"cc", "c"}, "ccc"},
        {{<<"cc">>, <<"c">>}, <<"ccc">>},
@@ -77,7 +80,7 @@ one_of_test_() ->
 
 tag_test_() ->
     lists:map(
-      t(tag("Hello")),
+      ?T(tag("Hello")),
       [{{", World!", "Hello"}, "Hello, World!"},
        {{<<", World!">>, <<"Hello">>}, <<"Hello, World!">>},
        {nomatch, "Something"},
@@ -85,7 +88,7 @@ tag_test_() ->
 
 tag_no_case_test_() ->
     lists:map(
-      t(tag_no_case("hello")),
+      ?T(tag_no_case("hello")),
       [{{", World!", "Hello"}, "Hello, World!"},
        {{<<", World!">>, <<"Hello">>}, <<"Hello, World!">>},
        {{", World!", "hello"}, "hello, World!"},
@@ -95,14 +98,14 @@ tag_no_case_test_() ->
 
 re_b_plus_test_() ->
     lists:map(
-      t(re("b+")),
+      ?T(re("b+")),
       [{nomatch, "aaabbb"},
        {{"aaa", "bbb"}, "bbbaaa"},
        {{<<"aaa">>, <<"bbb">>}, <<"bbbaaa">>}]).
 
 re_az_star_test_() ->
     lists:map(
-      t(re("[a-z_]*")),
+      ?T(re("[a-z_]*")),
       [{{"123", ""}, "123"},
        {{"", "bbbaaa"}, "bbbaaa"},
        {{<<"">>, <<"bbbaaa">>}, <<"bbbaaa">>},
@@ -110,14 +113,14 @@ re_az_star_test_() ->
 
 re_no_case_test_() ->
     lists:map(
-      t(re("inner( join)?")),
+      ?T(re("inner( join)?")),
       [{{"abc", "inner"}, "innerabc"},
        {{"abc", "inner join"}, "inner joinabc"},
        {nomatch, "outer join"}]).
 
 alpha0_test_() ->
     lists:map(
-      t(alpha0()),
+      ?T(alpha0()),
       [{{"1c", "ab"}, "ab1c"},
        {{<<"1c">>, <<"ab">>}, <<"ab1c">>},
        {{"1c", []}, "1c"},
@@ -125,7 +128,7 @@ alpha0_test_() ->
 
 alpha1_test_() ->
     lists:map(
-      t(alpha1()),
+      ?T(alpha1()),
       [{{"1c", "aB"}, "aB1c"},
        {{<<"1c">>, <<"aB">>}, <<"aB1c">>},
        {nomatch, "1c"},
@@ -133,7 +136,7 @@ alpha1_test_() ->
 
 alphanumeric0_test_() ->
     lists:map(
-      t(alphanumeric0()),
+      ?T(alphanumeric0()),
       [{{"%1", "21cZ"}, "21cZ%1"},
        {{<<"%1">>, <<"21cZ">>}, <<"21cZ%1">>},
        {{"&Z21c", ""}, "&Z21c"},
@@ -141,7 +144,7 @@ alphanumeric0_test_() ->
 
 alphanumeric1_test_() ->
     lists:map(
-      t(alphanumeric1()),
+      ?T(alphanumeric1()),
       [{{"%1", "21cZ"}, "21cZ%1"},
        {{<<"%1">>, <<"21cZ">>}, <<"21cZ%1">>},
        {nomatch, "&H2"},
@@ -149,7 +152,7 @@ alphanumeric1_test_() ->
 
 digit0_test_() ->
     lists:map(
-      t(digit0()),
+      ?T(digit0()),
       [{{"c", "21"}, "21c"},
        {{<<"c">>, <<"21">>}, <<"21c">>},
        {{"", "21"}, "21"},
@@ -158,7 +161,7 @@ digit0_test_() ->
 
 digit1_test_() ->
     lists:map(
-      t(digit1()),
+      ?T(digit1()),
       [{{"c", "21"}, "21c"},
        {{<<"c">>, <<"21">>}, <<"21c">>},
        {{"", "21"}, "21"},
@@ -167,7 +170,7 @@ digit1_test_() ->
 
 multispace0_test_() ->
     lists:map(
-      t(multispace0()),
+      ?T(multispace0()),
       [{{"21c", " \t\n\r"}, " \t\n\r21c"},
        {{<<"21c">>, <<" \t\n\r">>}, <<" \t\n\r21c">>},
        {{"Z21c", ""}, "Z21c"},
@@ -176,7 +179,7 @@ multispace0_test_() ->
 
 multispace1_test_() ->
     lists:map(
-      t(multispace1()),
+      ?T(multispace1()),
       [{{"21c", " \t\n\r"}, " \t\n\r21c"},
        {{<<"21c">>, <<" \t\n\r">>}, <<" \t\n\r21c">>},
        {nomatch, "Z21c"},
@@ -185,7 +188,7 @@ multispace1_test_() ->
 
 alt_test_() ->
     lists:map(
-      t(alt([alpha1(), digit1()])),
+      ?T(alt([alpha1(), digit1()])),
       [{{"", "abc"}, "abc"},
        {{"123", "abc"}, "abc123"},
        {{<<"123">>, <<"abc">>}, <<"abc123">>},
@@ -195,7 +198,7 @@ alt_test_() ->
 
 permutation_test_() ->
     lists:map(
-      t(permutation([alpha1(), digit1()])),
+      ?T(permutation([alpha1(), digit1()])),
       [{{"", ["abc", "123"]}, "abc123"},
        {{"", ["123", "abc"]}, "123abc"},
        {{<<"">>, [<<"123">>, <<"abc">>]}, <<"123abc">>},
@@ -203,7 +206,7 @@ permutation_test_() ->
 
 sequence_test_() ->
     lists:map(
-      t(sequence([alpha1(), digit1()])),
+      ?T(sequence([alpha1(), digit1()])),
       [{{"", ["abc", "123"]}, "abc123"},
        {{<<"">>, [<<"abc">>, <<"123">>]}, <<"abc123">>},
        {nomatch, "123abc"},
@@ -211,9 +214,9 @@ sequence_test_() ->
 
 flat_sequence_test_() ->
     lists:map(
-      t(sequence([alpha1(),
-                  sequence([digit1(), alpha1()]),
-                  digit1()])),
+      ?T(sequence([alpha1(),
+                   sequence([digit1(), alpha1()]),
+                   digit1()])),
       [{{"", ["abc", "123", "def", "456"]}, "abc123def456"},
        {{<<"">>,
          [<<"abc">>,
@@ -226,7 +229,7 @@ flat_sequence_test_() ->
 
 all_consuming_test_() ->
     lists:map(
-      t(all_consuming(alpha1())),
+      ?T(all_consuming(alpha1())),
       [{{"", "abcd"}, "abcd"},
        {{<<"">>, <<"abcd">>}, <<"abcd">>},
        {nomatch, "abcd;"},
@@ -234,7 +237,7 @@ all_consuming_test_() ->
 
 delimited_test_() ->
     lists:map(
-      t(delimited(tag("("), tag("abc"), tag(")"))),
+      ?T(delimited(tag("("), tag("abc"), tag(")"))),
       [{{"", "abc"}, "(abc)"},
        {{"def", "abc"}, "(abc)def"},
        {{<<"def">>, <<"abc">>}, <<"(abc)def">>},
@@ -243,7 +246,7 @@ delimited_test_() ->
 
 pair_test_() ->
     lists:map(
-      t(pair(tag("abc"), tag("def"))),
+      ?T(pair(tag("abc"), tag("def"))),
       [{{"", ["abc", "def"]}, "abcdef"},
        {{"ghi", ["abc", "def"]}, "abcdefghi"},
        {{<<"ghi">>, [<<"abc">>, <<"def">>]}, <<"abcdefghi">>},
@@ -252,7 +255,7 @@ pair_test_() ->
 
 preceded_test_() ->
     lists:map(
-      t(preceded(tag("abc"), tag("def"))),
+      ?T(preceded(tag("abc"), tag("def"))),
       [{{"", "def"}, "abcdef"},
        {{"ghi", "def"}, "abcdefghi"},
        {{<<"ghi">>, <<"def">>}, <<"abcdefghi">>},
@@ -261,7 +264,7 @@ preceded_test_() ->
 
 separated_pair_test_() ->
     lists:map(
-      t(separated_pair(tag("abc"), tag("|"), tag("def"))),
+      ?T(separated_pair(tag("abc"), tag("|"), tag("def"))),
       [{{"", ["abc", "def"]}, "abc|def"},
        {{"ghi", ["abc", "def"]}, "abc|defghi"},
        {{<<"ghi">>, [<<"abc">>, <<"def">>]}, <<"abc|defghi">>},
@@ -270,7 +273,7 @@ separated_pair_test_() ->
 
 terminated_test_() ->
     lists:map(
-      t(terminated(tag("abc"), tag("def"))),
+      ?T(terminated(tag("abc"), tag("def"))),
       [{{"", "abc"}, "abcdef"},
        {{"ghi", "abc"}, "abcdefghi"},
        {{<<"ghi">>, <<"abc">>}, <<"abcdefghi">>},
@@ -280,14 +283,14 @@ terminated_test_() ->
 
 map_result_test_() ->
     lists:map(
-      t(map_result(digit1(), fun string:length/1)),
+      ?T(map_result(digit1(), fun string:length/1)),
       [{{"", 6}, "123456"},
        {{<<"">>, 6}, <<"123456">>},
        {nomatch, "abc"}]).
 
 map_parser_test_() ->
     lists:map(
-      t(map_parser(take(5), digit1())),
+      ?T(map_parser(take(5), digit1())),
       [{{"", "12345"}, "12345"},
        {{"abc", "12345"}, "12345abc"},
        {{<<"abc">>, <<"12345">>}, <<"12345abc">>},
@@ -297,41 +300,41 @@ map_parser_test_() ->
 
 opt_test_() ->
     lists:map(
-      t(opt(alpha1())),
+      ?T(opt(alpha1())),
       [{{";", "abcd"}, "abcd;"},
        {{<<";">>, <<"abcd">>}, <<"abcd;">>},
        {{"123;", none}, "123;"}]).
 
 value_test_() ->
     lists:map(
-      t(value(1234, alpha1())),
+      ?T(value(1234, alpha1())),
       [{{";", 1234}, "abcd;"},
        {{<<";">>, 1234}, <<"abcd;">>},
        {nomatch, "123;"}]).
 
 condition_true_test_() ->
     lists:map(
-      t(condition(true, alpha1())),
+      ?T(condition(true, alpha1())),
       [{{";", "abcd"}, "abcd;"},
        {{<<";">>, <<"abcd">>}, <<"abcd;">>},
        {nomatch, "123;"}]).
 
 condition_false_test_() ->
     lists:map(
-      t(condition(false, alpha1())),
+      ?T(condition(false, alpha1())),
       [{{"abcd;", none}, "abcd;"},
        {{<<"abcd;">>, none}, <<"abcd;">>}]).
 
 
 peek_test_() ->
     lists:map(
-      t(peek(alpha1())),
+      ?T(peek(alpha1())),
       [{{"abcd;", "abcd"}, "abcd;"},
        {nomatch, "123;"}]).
 
 eof_test_() ->
     lists:map(
-      t(eof()),
+      ?T(eof()),
       [{nomatch, "abc"},
        {{"", ""}, ""},
        {{<<>>, <<>>}, <<>>}]).
@@ -339,7 +342,7 @@ eof_test_() ->
 
 is_not_test_() ->
     lists:map(
-      t(is_not(alpha1())),
+      ?T(is_not(alpha1())),
       [{nomatch, "abc"},
        {{"", "123"}, "123"},
        {{<<"">>, <<"123">>}, <<"123">>},
@@ -348,7 +351,7 @@ is_not_test_() ->
 
 hex_digit0_test_() ->
     lists:map(
-      t(hex_digit0()),
+      ?T(hex_digit0()),
       [{{"Z", "21c"}, "21cZ"},
        {{<<"Z">>, <<"21c">>}, <<"21cZ">>},
        {{"Z21c", ""}, "Z21c"},
@@ -357,7 +360,7 @@ hex_digit0_test_() ->
 
 hex_digit1_test_() ->
     lists:map(
-      t(hex_digit1()),
+      ?T(hex_digit1()),
       [{{"Z", "21c"}, "21cZ"},
        {{<<"Z">>, <<"21c">>}, <<"21cZ">>},
        {nomatch, "Z21c"},
@@ -365,7 +368,7 @@ hex_digit1_test_() ->
 
 take_test_() ->
     lists:map(
-      t(take(5)),
+      ?T(take(5)),
       [{{"", "12345"}, "12345"},
        {{"6", "12345"}, "123456"},
        {{<<"6">>, <<"12345">>}, <<"123456">>},
@@ -375,13 +378,13 @@ take_test_() ->
 
 lsn_test_() ->
     lists:map(
-      t(sequence([hex_digit1(), tag("/"), hex_digit1()])),
+      ?T(sequence([hex_digit1(), tag("/"), hex_digit1()])),
       [{{"", ["0", "/", "0"]}, "0/0"},
       {{<<"">>,[<<"0">>, <<"/">>, <<"0">>]}, <<"0/0">>}]).
 
 many1_test_() ->
     lists:map(
-      t(many1(alt([tag("abc"), tag("def")]))),
+      ?T(many1(alt([tag("abc"), tag("def")]))),
       [{{"", ["abc", "abc"]}, "abcabc"},
        {{"", ["abc", "def"]}, "abcdef"},
        {{"123", ["abc"]}, "abc123"},
@@ -391,7 +394,7 @@ many1_test_() ->
 
 separated_list0_test_() ->
     lists:map(
-      t(separated_list0(tag("|"), tag("abc"))),
+      ?T(separated_list0(tag("|"), tag("abc"))),
       [{{"", ["abc", "abc", "abc"]}, "abc|abc|abc"},
        {{"123abc", ["abc"]}, "abc123abc"},
        {{"|def", ["abc"]}, "abc|def"},
@@ -400,7 +403,7 @@ separated_list0_test_() ->
 
 separated_list1_test_() ->
     lists:map(
-      t(separated_list1(tag("|"), tag("abc"))),
+      ?T(separated_list1(tag("|"), tag("abc"))),
       [{{"", ["abc", "abc", "abc"]}, "abc|abc|abc"},
        {{"123abc", ["abc"]}, "abc123abc"},
        {{<<"123abc">>, [<<"abc">>]}, <<"abc123abc">>},
@@ -410,7 +413,7 @@ separated_list1_test_() ->
 
 none_of_test_() ->
     lists:map(
-      t(none_of("abc")),
+      ?T(none_of("abc")),
       [{{"", "z"}, "z"},
        {nomatch, "a"},
        {nomatch, ""},
@@ -419,7 +422,7 @@ none_of_test_() ->
 
 i128_little_test_() ->
     lists:map(
-      t(scran_number:i128(little)),
+      ?T(scran_number:i128(little)),
       [{{<<>>,
          16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d},
         <<16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d:128/little>>},
@@ -497,7 +500,7 @@ u(F) ->
     fun
         ({Endianess, Size}) ->
             lists:map(
-              t(F(Endianess, Size)),
+              ?T(F(Endianess, Size)),
               [{{<<>>, 0}, bits(Endianess, Size, 0)},
                {{<<>>, 1}, bits(Endianess, Size, 1)},
                {{<<>>, 1 bsl Size - 1}, bits(Endianess, Size, 1 bsl Size - 1)},
@@ -570,7 +573,7 @@ i(F) ->
     fun
         ({Endianess, Size}) ->
             lists:map(
-              t(F(Endianess, Size)),
+              ?T(F(Endianess, Size)),
               [{{<<>>, -1 bsl (Size - 1)}, bits(Endianess, Size, -1 bsl (Size - 1))},
                {{<<>>, -1}, bits(Endianess, Size, (1 bsl Size) - 1)},
                {{<<>>, 0}, bits(Endianess, Size, 0)},
@@ -590,35 +593,35 @@ bits(big, Size, Value) ->
 
 bytes_take_test_() ->
     lists:map(
-      t(scran_bytes:take(6)),
+      ?T(scran_bytes:take(6)),
       [{{<<>>, <<"123456">>}, <<"123456">>},
        {{<<"321">>, <<"123456">>}, <<"123456321">>},
        {nomatch, <<"123">>}]).
 
 bytes_tag_test_() ->
     lists:map(
-      t(scran_bytes:tag(<<"abc">>)),
+      ?T(scran_bytes:tag(<<"abc">>)),
       [{{<<"123">>, <<"abc">>}, <<"abc123">>},
        {{<<>>, <<"abc">>}, <<"abc">>},
        {nomatch, <<"123">>}]).
 
 bytes_null_terminated_test_() ->
     lists:map(
-      t(scran_bytes:null_terminated()),
+      ?T(scran_bytes:null_terminated()),
       [{{<<>>, <<"null">>}, <<"null", 0:8>>},
        {nomatch, <<"missing null">>},
        {{<<"terminated">>, <<"null">>}, <<"null", 0:8, "terminated">>}]).
 
 bytes_length_encoded_test_() ->
     lists:map(
-      t(scran_bytes:length_encoded(scran_number_be:u16())),
+      ?T(scran_bytes:length_encoded(scran_number_be:u16())),
       [{{<<" World!">>, <<"Hello">>}, <<5:16, "Hello World!">>},
        {nomatch, <<5:16, "He">>},
        {nomatch, <<>>}]).
 
 result_into_bits_test_() ->
     lists:map(
-      t(into_bits(scran_number_be:u16(), 16)),
+      ?T(into_bits(scran_number_be:u16(), 16)),
       [{{<<>>, <<5:16>>}, <<5:16>>},
        {{<<"abc">>, <<5:16>>}, <<5:16, "abc">>},
        {nomatch, <<5:8>>},
@@ -626,7 +629,7 @@ result_into_bits_test_() ->
 
 bits_into_boolean_test_() ->
     lists:map(
-      t(into_boolean()),
+      ?T(into_boolean()),
       [{{<<>>, true}, <<1:1>>},
        {{<<>>, false}, <<0:1>>},
        {{<<0:1>>, true}, <<2#10:2>>},
@@ -635,25 +638,25 @@ bits_into_boolean_test_() ->
 
 bits_into_many1_boolean_test_() ->
     lists:map(
-      t(map_parser(into_bits(scran_number_be:u(3), 3),
-                   many1(into_boolean()))),
+      ?T(map_parser(into_bits(scran_number_be:u(3), 3),
+                    many1(into_boolean()))),
       [{{<<>>, [true, false, true]}, <<2#101:3>>},
        {{<<>>, [false, true, false]}, <<2#010:3>>}]).
 
 kv_test_() ->
     lists:map(
-      t(kv(action, alpha1())),
+      ?T(kv(action, alpha1())),
       [{{[], {action, "SELECT"}}, "SELECT"},
        {nomatch, "123"}]).
 
 into_snake_case_test_() ->
     lists:map(
-      t(kv(join_type,
-           into_snake_case(
-             alt([re_no_case("(INNER )?JOIN"),
-                  re_no_case("LEFT (OUTER )?JOIN"),
-                  re_no_case("RIGHT (OUTER )?JOIN"),
-                  re_no_case("FULL (OUTER )?JOIN")])))),
+      ?T(kv(join_type,
+            into_snake_case(
+              alt([re_no_case("(INNER )?JOIN"),
+                   re_no_case("LEFT (OUTER )?JOIN"),
+                   re_no_case("RIGHT (OUTER )?JOIN"),
+                   re_no_case("FULL (OUTER )?JOIN")])))),
       [{{[], {join_type, "join"}}, "join"},
        {{<<>>, {join_type, <<"join">>}}, <<"JOIN">>},
        {{[], {join_type, "inner_join"}}, "inner join"},
@@ -666,37 +669,50 @@ into_snake_case_test_() ->
 
 into_atom_test_() ->
     lists:map(
-      t(into_atom(alpha1())),
+      ?T(into_atom(alpha1())),
       [{{[], join}, "join"},
       {{<<>>, join}, <<"join">>}]).
 
 into_existing_atom_test_() ->
     lists:map(
-      t(into_existing_atom(alpha1())),
+      ?T(into_existing_atom(alpha1())),
       [{{[], join}, "join"},
        {{<<>>, join}, <<"join">>},
        {nomatch, alpha(5)}]).
 
 into_map_test_() ->
     lists:map(
-      t(into_map(
+      ?T(into_map(
           separated_pair(kv(k, alpha1()),
                          tag("="),
                          kv(v, digit1())))),
       [{{[], #{k => "abc", v => "123"}}, "abc=123"},
        {nomatch, "abc"}]).
 
-
 into_integer_test_() ->
     lists:map(
-      t(into_integer(digit1())),
+      ?T(into_integer(digit1())),
       [{{"abc", 123}, "123abc"},
        {{<<"abc">>, 123}, <<"123abc">>},
        {nomatch, "abc123"}]).
 
+into_tuple_test_() ->
+    lists:map(
+      ?T(into_tuple(
+           separated_pair(
+             alpha1(),
+             tag("="),
+             into_integer(digit1())))),
+      [{{"", {"a", 123}}, "a=123"},
+       {{"b=321", {"a", 123}}, "a=123b=321"},
+       {nomatch, "a"},
+       {nomatch, "a="},
+       {nomatch, "a=b"},
+       {nomatch, ""}]).
+
 result_ignore_test_() ->
     lists:map(
-      t(into_map(
+      ?T(into_map(
           sequence(
             [kv(k, alpha1()),
              ignore(tag("=")),
@@ -704,11 +720,130 @@ result_ignore_test_() ->
       [{{[], #{k => "abc", v => "123"}}, "abc=123"},
        {nomatch, "abc"}]).
 
-t(Parser) ->
-    fun
-        ({Expected, Input} = Test) ->
-            {nm(Test), ?_assertEqual(Expected, Parser(Input))}
-    end.
+count_n_test_() ->
+    lists:map(
+      ?T(scran_multi:count(3, one_of(lists:seq($0, $9)))),
+      [{{[], ["1", "2", "3"]}, "123"},
+       {{"456", ["1", "2", "3"]}, "123456"},
+       {nomatch, "12"},
+       {nomatch, "abc"}]).
+
+count_num_of_item_parser_test_() ->
+    lists:map(
+      ?T(scran_multi:count(
+           scran_number_be:u(16),
+           into_tuple(
+             sequence([scran_bytes:null_terminated(),
+                       scran_bytes:null_terminated()])))),
+      [{{<<"pqr">>, [{<<"a">>, <<"123">>}]},
+        <<1:16, "a", 0, "123", 0, "pqr">>},
+
+       {{<<"pqr">>, [{<<"a">>, <<"123">>}, {<<"b">>, <<"321">>}]},
+        <<2:16, "a", 0, "123", 0, "b", 0, "321", 0, "pqr">>},
+
+       {{<<>>, []}, <<0:16>>},
+
+       {nomatch, <<-1:16>>},
+
+       {nomatch, <<>>},
+
+       {nomatch, <<2:16, "a", 0, "123", 0, "pqr">>}]).
+
+
+fold_test_() ->
+    lists:map(
+      ?T(scran_multi:fold(
+           scran_number_be:u(16),
+           into_tuple(
+             sequence([scran_bytes:null_terminated(),
+                       scran_bytes:null_terminated()])),
+          [],
+          fun
+              (Result, A) ->
+                  [Result | A]
+          end)),
+      [{{<<"pqr">>, [{<<"a">>, <<"123">>}]},
+        <<1:16, "a", 0, "123", 0, "pqr">>},
+
+       {{<<"pqr">>, [{<<"b">>, <<"321">>}, {<<"a">>, <<"123">>}]},
+        <<2:16, "a", 0, "123", 0, "b", 0, "321", 0, "pqr">>},
+
+       {{<<>>, []}, <<0:16>>},
+
+       {nomatch, <<-1:16>>},
+
+       {nomatch, <<>>},
+
+       {nomatch, <<2:16, "a", 0, "123", 0, "pqr">>}]).
+
+
+fold_many0_test_() ->
+    lists:map(
+      ?T(scran_multi:fold_many0(
+          one_of(lists:seq($0, $9)),
+          [],
+          fun
+              (Result, A) ->
+                  [Result | A]
+          end)),
+      [{{"", ["3", "2", "1"]}, "123"},
+       {{"", ["6", "5", "4", "3", "2", "1"]}, "123456"},
+       {{"", []}, ""},
+       {{"abc", []}, "abc"}]).
+
+fold_many1_test_() ->
+    lists:map(
+      ?T(scran_multi:fold_many1(
+          one_of(lists:seq($0, $9)),
+          [],
+          fun
+              (Result, A) ->
+                  [Result | A]
+          end)),
+      [{{[], ["3", "2", "1"]}, "123"},
+       {{[], ["6", "5", "4", "3", "2", "1"]}, "123456"},
+       {nomatch, ""},
+       {nomatch, "abc"}]).
+
+fold_many_m_n_variable_test_() ->
+    lists:map(
+      ?T(scran_multi:fold_many_m_n(
+          3,
+          5,
+          one_of(lists:seq($0, $9)),
+          [],
+          fun
+              (Result, A) ->
+                  [Result | A]
+          end)),
+      [{nomatch, "1"},
+       {nomatch, "12"},
+       {{[], ["3", "2", "1"]}, "123"},
+       {{[], ["4", "3", "2", "1"]}, "1234"},
+       {{[], ["5", "4", "3", "2", "1"]}, "12345"},
+       {{"6", ["5", "4", "3", "2", "1"]}, "123456"},
+       {nomatch, ""},
+       {nomatch, "abc"}]).
+
+fold_many_m_n_fixed_test_() ->
+    lists:map(
+      ?T(scran_multi:fold_many_m_n(
+          3,
+          3,
+          one_of(lists:seq($0, $9)),
+          [],
+          fun
+              (Result, A) ->
+                  [Result | A]
+          end)),
+      [{nomatch, "1"},
+       {nomatch, "12"},
+       {{[], ["3", "2", "1"]}, "123"},
+       {{"4", ["3", "2", "1"]}, "1234"},
+       {{"45", ["3", "2", "1"]}, "12345"},
+       {{"456", ["3", "2", "1"]}, "123456"},
+       {nomatch, ""},
+       {nomatch, "abc"}]).
 
 
 nm(Test) ->

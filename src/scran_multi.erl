@@ -12,16 +12,233 @@
 %% See the License for the specific language governing permissions and
 %% limitations under the License.
 
+%% @doc Parser combinators applying their child parser multiple times.
 
 -module(scran_multi).
 
 
 -feature(maybe_expr, enable).
 
+
+-export([count/2]).
+-export([fold/4]).
+-export([fold_many0/3]).
+-export([fold_many1/3]).
+-export([fold_many_m_n/5]).
 -export([many1/1]).
 -export([separated_list0/2]).
 -export([separated_list1/2]).
+-export_type([gatherer/0]).
 -include_lib("kernel/include/logger.hrl").
+
+
+-type gatherer() :: fun((term(), term()) -> term()).
+
+
+%% @doc Run the embedded parser N times gathering the results in a
+%% list.
+
+-spec count(pos_integer() | scran:parser(scran:input(), pos_integer()), scran:parser()) -> scran:parser().
+
+count(NumOfItemParser, ItemParser) when is_function(NumOfItemParser) ->
+    ?LOG_DEBUG(#{num_of_item_parser => NumOfItemParser,
+                 parser => scran_debug:pp(ItemParser)}),
+    fun
+        (Input) ->
+            maybe
+                {Remainding, N} ?= NumOfItemParser(Input),
+                (?FUNCTION_NAME(N, ItemParser))(Remainding)
+            end
+    end;
+
+count(N, Parser) when is_integer(N), N >= 0 ->
+    ?LOG_DEBUG(#{n => N, parser => scran_debug:pp(Parser)}),
+    fun
+        (Input) ->
+            ?FUNCTION_NAME(Parser, Input, N, [])
+    end.
+
+count(Parser, Input, 0 = N, A) ->
+    ?LOG_DEBUG(#{input => Input,
+                 a => A,
+                 n => N,
+                 parser => scran_debug:pp(Parser)}),
+    {Input, lists:reverse(A)};
+
+count(Parser, Input, N, A) ->
+    ?LOG_DEBUG(#{input => Input,
+                 a => A,
+                 n => N,
+                 parser => scran_debug:pp(Parser)}),
+    case Parser(Input) of
+        {Remaining, Result} ->
+            ?FUNCTION_NAME(Parser, Remaining, N - 1, [Result | A]);
+
+        nomatch ->
+            nomatch
+    end.
+
+
+fold(NumOfItemParser, ItemParser, Initial, Gatherer) ->
+    ?LOG_DEBUG(#{num_of_items_parser => NumOfItemParser,
+                 item_parser => scran_debug:pp(ItemParser),
+                 initial => Initial,
+                 gatherer => scran_debug:pp(Gatherer)}),
+    fun
+        (Input) ->
+            maybe
+                {Remainding, N} ?= NumOfItemParser(Input),
+                ?FUNCTION_NAME(Remainding, N, ItemParser, Initial, Gatherer)
+            end
+    end.
+
+fold(Input, 0 = N, ItemParser, A, Gatherer) ->
+    ?LOG_DEBUG(#{input => Input,
+                 n => N,
+                 item_parser => scran_debug:pp(ItemParser),
+                 a => A,
+                 gatherer => scran_debug:pp(Gatherer)}),
+    {Input, A};
+
+fold(Input, N, ItemParser, A, Gatherer) when N > 0 ->
+    ?LOG_DEBUG(#{input => Input,
+                 n => N,
+                 item_parser => scran_debug:pp(ItemParser),
+                 a => A,
+                 gatherer => scran_debug:pp(Gatherer)}),
+    maybe
+        {Remaining, Result} ?= ItemParser(Input),
+        ?FUNCTION_NAME(Remaining, N - 1, ItemParser, Gatherer(Result, A), Gatherer)
+    end.
+
+
+%% @doc Repeats the embedded parser gathering the results.
+
+-spec fold_many0(scran:parser(), term(), gatherer()) -> scran:parser().
+
+fold_many0(Parser, Initial, Gatherer) ->
+    ?LOG_DEBUG(#{initial => Initial,
+                 parser => scran_debug:pp(Parser),
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    fun
+        (Input) ->
+            ?FUNCTION_NAME(Parser, Input, Initial, Gatherer)
+    end.
+
+fold_many0(Parser, Input, A, Gatherer) ->
+    ?LOG_DEBUG(#{parser => scran_debug:pp(Parser),
+                 input => Input,
+                 a => A,
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    case Parser(Input) of
+        {Remaining, Result} ->
+            ?FUNCTION_NAME(Parser, Remaining, Gatherer(Result, A), Gatherer);
+
+        nomatch ->
+            {Input, A}
+    end.
+
+
+%% @doc Repeats the embedded parser gathering the results.
+
+-spec fold_many1(scran:parser(), term(), gatherer()) -> scran:parser().
+
+fold_many1(Parser, Initial, Gatherer) ->
+    ?LOG_DEBUG(#{initial => Initial,
+                 parser => scran_debug:pp(Parser),
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    fun
+        (Input) ->
+            ?FUNCTION_NAME(Parser, Input, 0, Initial, Gatherer)
+    end.
+
+fold_many1(Parser, Input, I, A, Gatherer) ->
+    ?LOG_DEBUG(#{parser => scran_debug:pp(Parser),
+                 input => Input,
+                 i => I,
+                 a => A,
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    case Parser(Input) of
+        {Remaining, Result} ->
+            ?FUNCTION_NAME(Parser, Remaining, I + 1, Gatherer(Result, A), Gatherer);
+
+        nomatch when I == 0 ->
+            nomatch;
+
+        nomatch ->
+            {Input, A}
+    end.
+
+%% @doc Repeats the embedded parser Minimum..=Maximum times, calling Gather to gather the results
+
+-spec fold_many_m_n(non_neg_integer(), pos_integer(), scran:parser(), term(), gatherer()) -> scran:parser().
+
+fold_many_m_n(Minimum, Maximum, Parser, Initial, Gatherer) when Minimum =< Maximum ->
+    ?LOG_DEBUG(#{minimum => Minimum,
+                 maximum => Maximum,
+                 parser => scran_debug:pp(Parser),
+                 initial => Initial,
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    fun
+        (Input) ->
+            ?FUNCTION_NAME(Minimum, Maximum, Parser, Input, 0, Initial, Gatherer)
+    end.
+
+fold_many_m_n(Minimum, Maximum, Parser, Input, I, A, Gatherer) when Minimum < Maximum, I < Minimum ->
+    ?LOG_DEBUG(#{minimum => Minimum,
+                 maximum => Maximum,
+                 parser => scran_debug:pp(Parser),
+                 input => Input,
+                 i => I,
+                 a => A,
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    case Parser(Input) of
+        {Remaining, Result} ->
+            ?FUNCTION_NAME(Minimum,
+                           Maximum,
+                           Parser,
+                           Remaining,
+                           I + 1,
+                           Gatherer(Result, A),
+                           Gatherer);
+        nomatch ->
+            nomatch
+    end;
+
+fold_many_m_n(Minimum, Maximum, Parser, Input, I, A, Gatherer) when I < Maximum ->
+    ?LOG_DEBUG(#{minimum => Minimum,
+                 maximum => Maximum,
+                 parser => scran_debug:pp(Parser),
+                 input => Input,
+                 i => I,
+                 a => A,
+                 gatherer => scran_debug:pp(Gatherer)}),
+
+    case Parser(Input) of
+        {Remaining, Result} when I < (Maximum - 1) ->
+            ?FUNCTION_NAME(Minimum,
+                           Maximum,
+                           Parser,
+                           Remaining,
+                           I + 1,
+                           Gatherer(Result, A),
+                           Gatherer);
+
+        {Remaining, Result} ->
+            {Remaining, Gatherer(Result, A)};
+
+        nomatch when Minimum =< I ->
+            {Input, A};
+
+        nomatch ->
+            nomatch
+    end.
 
 
 %% @doc Runs the embedded parser at least once, gathering the results.
