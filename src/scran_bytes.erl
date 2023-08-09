@@ -33,9 +33,23 @@
 %% @doc Take N bytes from the input, returning the remaining input and
 %% the taken bytes.
 
--spec take(non_neg_integer()) -> scran:parser(binary(), binary()).
+-spec take(non_neg_integer() | scran:parser(binary(), pos_integer())) -> scran:parser(binary(), binary()).
 
-take(N) ->
+take(NumBytesParser) when is_function(NumBytesParser) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{num_bytes_parser => scran_debug:pp(NumBytesParser),
+                        input => Input}),
+
+            maybe
+                {Remaining, N} ?= NumBytesParser(Input),
+                ?LOG_DEBUG(#{remaining => Remaining, n => N}),
+                (?FUNCTION_NAME(N))(Remaining)
+            end
+    end;
+
+take(N) when is_integer(N), N >= 0 ->
+    ?LOG_DEBUG(#{n => N}),
     fun
         (<<Taken:N/bytes, Remaining/bytes>>) ->
             ?LOG_DEBUG(#{n => N,
@@ -44,7 +58,13 @@ take(N) ->
 
             {Remaining, Taken};
 
-        (_) ->
+        (L) when is_list(L), length(L) >= N  ->
+            {Taken, Remaining} = lists:split(N, L),
+            ?LOG_DEBUG(#{l => L, taken => Taken, remaining => Remaining}),
+            {Remaining, list_to_binary(Taken)};
+
+        (Otherwise) ->
+            ?LOG_DEBUG(#{nomatch => Otherwise, n => N}),
             nomatch
     end.
 
@@ -86,8 +106,14 @@ split(Pattern) ->
 length_encoded(LengthParser) ->
     fun
         (Input) ->
+            ?LOG_DEBUG(#{length_parser => scran_debug:pp(LengthParser),
+                         input => Input}),
+
             maybe
                 {Remaining, Length} ?= LengthParser(Input),
+
+                ?LOG_DEBUG(#{remaining => Remaining, length => Length}),
+
                 (take(Length))(Remaining)
             end
     end.
