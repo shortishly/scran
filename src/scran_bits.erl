@@ -19,6 +19,7 @@
 
 
 -export([into_boolean/0]).
+-export([tag/1]).
 
 
 %% @doc Takes 1 bit from the input converting it into a boolean.
@@ -33,6 +34,21 @@ into_boolean() ->
 
         (<<1:1, Remaining/bits>>) ->
             {Remaining, true};
+
+        (_) ->
+            nomatch
+    end.
+
+
+%% @doc Return the matching input.
+
+-spec tag(bitstring()) -> scran:parser().
+
+tag(Tag) ->
+    fun
+        (<<Matched:(bit_size(Tag))/bits, Remaining/bits>>)
+          when Tag == Matched ->
+            {Remaining, Tag};
 
         (_) ->
             nomatch
