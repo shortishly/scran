@@ -257,6 +257,11 @@ int(little, signed, Size) ->
         (<<I:Size/little-signed, Remaining/bytes>>) ->
             {Remaining, I};
 
+        (L) when is_list(L), length(L) * 8 >= Size ->
+            {Taken, Remaining} = lists:split(Size div 8, L),
+            <<I:Size/little-signed>> = list_to_binary(Taken),
+            {Remaining, I};
+
         (_) ->
             nomatch
     end;
@@ -266,13 +271,23 @@ int(little, unsigned, Size) ->
         (<<I:Size/little-unsigned, Remaining/bytes>>) ->
             {Remaining, I};
 
+        (L) when is_list(L), length(L) * 8 >= Size ->
+            {Taken, Remaining} = lists:split(Size div 8, L),
+            <<I:Size/little-unsigned>> = list_to_binary(Taken),
+            {Remaining, I};
+
         (_) ->
             nomatch
     end;
 
 int(big, signed, Size) ->
     fun
-        (<<I:Size/big-signed, Remaining/bytes>>) ->
+        (<<I:Size/signed, Remaining/bytes>>) ->
+            {Remaining, I};
+
+        (L) when is_list(L), length(L) * 8 >= Size ->
+            {Taken, Remaining} = lists:split(Size div 8, L),
+            <<I:Size/signed>> = list_to_binary(Taken),
             {Remaining, I};
 
         (_) ->
@@ -281,7 +296,12 @@ int(big, signed, Size) ->
 
 int(big, unsigned, Size) ->
     fun
-        (<<I:Size/big-unsigned, Remaining/bytes>>) ->
+        (<<I:Size/unsigned, Remaining/bytes>>) ->
+            {Remaining, I};
+
+        (L) when is_list(L), length(L) * 8 >= Size ->
+            {Taken, Remaining} = lists:split(Size div 8, L),
+            <<I:Size/unsigned>> = list_to_binary(Taken),
             {Remaining, I};
 
         (_) ->
