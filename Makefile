@@ -40,6 +40,15 @@ PLT_APPS = \
 
 EDOC_OPTS = {preprocess, true}, {dir, "_site/edoc"}
 
+define HEX_TARBALL_EXTRA_METADATA
+#{
+	licenses => [<<"Apache-2">>],
+	links => #{
+		<<"GitHub">> => <<"https://github.com/shortishly/scran">>
+	}
+}
+endef
+
 include $(if $(ERLANG_MK_FILENAME),$(ERLANG_MK_FILENAME),erlang.mk)
 
 app:: rebar.config

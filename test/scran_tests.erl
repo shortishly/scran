@@ -37,7 +37,6 @@
 -import(scran_character_complete, [re_no_case/1]).
 -import(scran_character_complete, [tag/1]).
 -import(scran_character_complete, [tag_no_case/1]).
--import(scran_character_complete, [take/1]).
 -import(scran_combinator, [all_consuming/1]).
 -import(scran_combinator, [condition/2]).
 -import(scran_combinator, [eof/0]).
@@ -46,6 +45,7 @@
 -import(scran_combinator, [map_result/2]).
 -import(scran_combinator, [opt/1]).
 -import(scran_combinator, [peek/1]).
+-import(scran_combinator, [rest/0]).
 -import(scran_combinator, [value/2]).
 -import(scran_multi, [many1/1]).
 -import(scran_multi, [separated_list0/2]).
@@ -290,7 +290,7 @@ map_result_test_() ->
 
 map_parser_test_() ->
     lists:map(
-      ?T(map_parser(take(5), digit1())),
+      ?T(map_parser(scran_character_complete:take(5), digit1())),
       [{{"", "12345"}, "12345"},
        {{"abc", "12345"}, "12345abc"},
        {{<<"abc">>, <<"12345">>}, <<"12345abc">>},
@@ -332,11 +332,21 @@ peek_test_() ->
       [{{"abcd;", "abcd"}, "abcd;"},
        {nomatch, "123;"}]).
 
+
 eof_test_() ->
     lists:map(
       ?T(eof()),
       [{nomatch, "abc"},
        {{"", ""}, ""},
+       {{<<>>, <<>>}, <<>>}]).
+
+
+rest_test_() ->
+    lists:map(
+      ?T(rest()),
+      [{{"", "abc"}, "abc"},
+       {{"", ""}, ""},
+       {{<<>>, <<"abc">>}, <<"abc">>},
        {{<<>>, <<>>}, <<>>}]).
 
 
@@ -366,15 +376,27 @@ hex_digit1_test_() ->
        {nomatch, "Z21c"},
        {nomatch, ""}]).
 
-take_test_() ->
+character_take_n_test_() ->
     lists:map(
-      ?T(take(5)),
+      ?T(scran_character_complete:take(5)),
       [{{"", "12345"}, "12345"},
+       {{<<"c">>,<<"åäöab"/utf8>>},
+        list_to_binary([195, 165, 195, 164, 195, 182, 97, 98, 99])},
        {{"6", "12345"}, "123456"},
        {{<<"6">>, <<"12345">>}, <<"123456">>},
        {nomatch, "1234"},
        {nomatch, ""}]).
 
+bytes_take_num_byte_parser_test_() ->
+    lists:map(
+      ?T(scran_bytes:take(scran_number_be:u(16))),
+      [{{"", <<"12345">>}, binary_to_list(<<5:16, "12345">>)},
+       {{"6", <<"12345">>}, binary_to_list(<<5:16, "123456">>)},
+       {{<<"6">>, <<"12345">>}, <<5:16, "123456">>},
+       {{<<"äö"/utf8>>, <<"å"/utf8>>}, <<2:16, 195, 165, 195, 164, 195, 182>>},
+       {nomatch, binary_to_list(<<5:16, "1234">>)},
+       {{"1234", <<>>}, binary_to_list(<<0:16, "1234">>)},
+       {nomatch, ""}]).
 
 lsn_test_() ->
     lists:map(
@@ -844,6 +866,15 @@ fold_many_m_n_fixed_test_() ->
        {{"456", ["3", "2", "1"]}, "123456"},
        {nomatch, ""},
        {nomatch, "abc"}]).
+
+
+success_test_() ->
+    lists:map(
+      ?T(scran_combinator:success(good)),
+      [{{[], good}, []},
+       {{"123", good}, "123"},
+       {{<<>>, good}, <<>>},
+       {{<<"123">>, good}, <<"123">>}]).
 
 
 nm(Test) ->
