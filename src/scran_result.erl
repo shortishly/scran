@@ -173,7 +173,7 @@ into_bits(Parser, Bits) ->
             (map_result(
                Parser,
                fun
-                   (Result) ->
+                   (Result) when is_integer(Result) ->
                        <<Result:Bits>>
                end))(Input)
     end.
