@@ -22,6 +22,7 @@
 
 -export([all_consuming/1]).
 -export([condition/2]).
+-export([condition/3]).
 -export([eof/0]).
 -export([ignore_result/1]).
 -export([is_not/1]).
@@ -29,6 +30,8 @@
 -export([map_result/2]).
 -export([opt/1]).
 -export([peek/1]).
+-export([rest/0]).
+-export([success/1]).
 -export([value/2]).
 -export_type([mapper/1]).
 -include_lib("kernel/include/logger.hrl").
@@ -112,7 +115,6 @@ opt(Parser) ->
             end
     end.
 
-
 %% @doc Returns the provided value if the child parser succeeds.
 
 -spec value(any(), scran:parser()) -> scran:parser().
@@ -130,7 +132,7 @@ value(Return, Parser) ->
 
 %% @doc Calls the parser if the condition is met.
 
--spec condition(boolean(), scran:parser()) -> scran:parser().
+-spec condition(function() | boolean(), scran:parser()) -> scran:parser().
 
 condition(false, Parser) ->
     fun
@@ -146,7 +148,50 @@ condition(true, Parser) ->
             maybe
                 {_, _} ?= Parser(Input)
             end
+    end;
+
+condition(F, Parser) when is_function(F) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{f => F,
+                         input => Input,
+                         parser => scran_debug:pp(Parser)}),
+
+            (?FUNCTION_NAME(F(), Parser))(Input)
     end.
+
+
+-spec  condition(function() | boolean(), scran:parser(), scran:parser()) -> scran:parser().
+
+condition(true, Parser, _) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{input => Input, parser => scran_debug:pp(Parser)}),
+            maybe
+                {_, _} ?= Parser(Input)
+            end
+    end;
+
+condition(false, _, Parser) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{input => Input, parser => scran_debug:pp(Parser)}),
+            maybe
+                {_, _} ?= Parser(Input)
+            end
+    end;
+
+condition(F, TrueBranch, FalseBranch) when is_function(F) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{f => F,
+                         input => Input,
+                         false_branch => scran_debug:pp(FalseBranch),
+                         true_branch => scran_debug:pp(TrueBranch)}),
+
+            (?FUNCTION_NAME(F(), TrueBranch, FalseBranch))(Input)
+    end.
+
 
 
 %% @doc Tries to apply its parser without consuming the input.
@@ -184,6 +229,20 @@ eof() ->
     end.
 
 
+%% @doc Returns the remaining input.
+
+-spec rest() -> scran:parser().
+
+rest() ->
+    fun
+        (Input) when is_binary(Input) ->
+            {<<>>, Input};
+
+        (Input) ->
+            {[], Input}
+    end.
+
+
 %% @doc Succeeds if the child parser returns an error.
 
 -spec is_not(scran:parser()) -> scran:parser().
@@ -202,4 +261,16 @@ is_not(Parser) ->
                 {_Input, _Matched} ->
                     nomatch
             end
+    end.
+
+
+%% @doc A parser which always succeeds with given value without
+%% consuming any input.
+
+-spec success(any()) -> scran:parser().
+
+success(Result) ->
+    fun
+        (Input) ->
+            {Input, Result}
     end.
