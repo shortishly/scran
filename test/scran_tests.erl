@@ -319,9 +319,32 @@ condition_true_test_() ->
        {{<<";">>, <<"abcd">>}, <<"abcd;">>},
        {nomatch, "123;"}]).
 
+condition_fun_true_test_() ->
+    lists:map(
+      ?T(condition(
+           fun
+               () ->
+                   true
+           end,
+           alpha1())),
+      [{{";", "abcd"}, "abcd;"},
+       {{<<";">>, <<"abcd">>}, <<"abcd;">>},
+       {nomatch, "123;"}]).
+
 condition_false_test_() ->
     lists:map(
       ?T(condition(false, alpha1())),
+      [{{"abcd;", none}, "abcd;"},
+       {{<<"abcd;">>, none}, <<"abcd;">>}]).
+
+condition_fun_false_test_() ->
+    lists:map(
+      ?T(condition(
+           fun
+               () ->
+                   false
+           end,
+           alpha1())),
       [{{"abcd;", none}, "abcd;"},
        {{<<"abcd;">>, none}, <<"abcd;">>}]).
 
