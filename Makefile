@@ -44,6 +44,8 @@ define HEX_TARBALL_EXTRA_METADATA
 #{
 	licenses => [<<"Apache-2">>],
 	links => #{
+		<<"Function reference">> => <<"https://shortishly.github.io/scran/edoc/">>,
+		<<"Test Coverage">> => <<"https://shortishly.github.io/scran/cover/">>,
 		<<"GitHub">> => <<"https://github.com/shortishly/scran">>
 	}
 }
