@@ -39,6 +39,7 @@
 -import(scran_character_complete, [tag_no_case/1]).
 -import(scran_combinator, [all_consuming/1]).
 -import(scran_combinator, [condition/2]).
+-import(scran_combinator, [condition/3]).
 -import(scran_combinator, [eof/0]).
 -import(scran_combinator, [is_not/1]).
 -import(scran_combinator, [map_parser/2]).
@@ -312,14 +313,14 @@ value_test_() ->
        {{<<";">>, 1234}, <<"abcd;">>},
        {nomatch, "123;"}]).
 
-condition_true_test_() ->
+condition2_true_test_() ->
     lists:map(
       ?T(condition(true, alpha1())),
       [{{";", "abcd"}, "abcd;"},
        {{<<";">>, <<"abcd">>}, <<"abcd;">>},
        {nomatch, "123;"}]).
 
-condition_fun_true_test_() ->
+condition2_fun_true_test_() ->
     lists:map(
       ?T(condition(
            fun
@@ -331,13 +332,13 @@ condition_fun_true_test_() ->
        {{<<";">>, <<"abcd">>}, <<"abcd;">>},
        {nomatch, "123;"}]).
 
-condition_false_test_() ->
+condition2_false_test_() ->
     lists:map(
       ?T(condition(false, alpha1())),
       [{{"abcd;", none}, "abcd;"},
        {{<<"abcd;">>, none}, <<"abcd;">>}]).
 
-condition_fun_false_test_() ->
+condition2_fun_false_test_() ->
     lists:map(
       ?T(condition(
            fun
@@ -347,6 +348,51 @@ condition_fun_false_test_() ->
            alpha1())),
       [{{"abcd;", none}, "abcd;"},
        {{<<"abcd;">>, none}, <<"abcd;">>}]).
+
+
+condition3_true_test_() ->
+    lists:map(
+      ?T(condition(true, alpha1(), digit1())),
+      [{{";", "abcd"}, "abcd;"},
+       {{<<";">>, <<"abcd">>}, <<"abcd;">>},
+       {nomatch, "123;"},
+       {nomatch, <<"123;">>}]).
+
+condition3_fun_true_test_() ->
+    lists:map(
+      ?T(condition(
+           fun
+               () ->
+                   true
+           end,
+           alpha1(),
+           digit1())),
+      [{{";", "abcd"}, "abcd;"},
+       {{<<";">>, <<"abcd">>}, <<"abcd;">>},
+       {nomatch, "123;"},
+       {nomatch, <<"123;">>}]).
+
+condition3_false_test_() ->
+    lists:map(
+      ?T(condition(false, alpha1(), digit1())),
+      [{nomatch, "abcd;"},
+       {nomatch, <<"abcd;">>},
+       {{";", "123"}, "123;"},
+       {{<<";">>, <<"123">>}, <<"123;">>}]).
+
+condition3_fun_false_test_() ->
+    lists:map(
+      ?T(condition(
+           fun
+               () ->
+                   false
+           end,
+           alpha1(),
+           digit1())),
+      [{nomatch, "abcd;"},
+       {nomatch, <<"abcd;">>},
+       {{";", "123"}, "123;"},
+       {{<<";">>, <<"123">>}, <<"123;">>}]).
 
 
 peek_test_() ->
