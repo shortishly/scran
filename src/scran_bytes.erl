@@ -24,6 +24,7 @@
 
 -export([length_encoded/1]).
 -export([null_terminated/0]).
+-export([part/2]).
 -export([split/1]).
 -export([tag/1]).
 -export([take/1]).
@@ -121,7 +122,7 @@ length_encoded(LengthParser) ->
 
 %% @doc Return the matching input.
 
--spec tag(binary()) -> scran:parser().
+-spec tag(binary()) -> scran:parser(binary(), binary()).
 
 tag(Tag) ->
     fun
@@ -131,4 +132,20 @@ tag(Tag) ->
 
         (_) ->
             nomatch
+    end.
+
+
+%% @doc Return part of the input from the supplied position and length.
+-spec part(non_neg_integer(), integer()) -> scran:parser().
+
+part(Position, Length) ->
+    fun
+        (Input) ->
+            try
+                {<<>>, binary:part(Input, Position, Length)}
+
+            catch
+                error:badarg ->
+                    nomatch
+            end
     end.

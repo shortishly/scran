@@ -21,12 +21,16 @@
 -feature(maybe_expr, enable).
 
 
+-export([combined_with/2]).
+-export([combined_with/3]).
 -export([delimited/3]).
+-export([followed_with/2]).
 -export([pair/2]).
 -export([preceded/2]).
 -export([separated_pair/3]).
 -export([sequence/1]).
 -export([terminated/2]).
+-export([zip/2]).
 -include_lib("kernel/include/logger.hrl").
 
 
@@ -131,7 +135,7 @@ separated_pair(First, Separator, Second) ->
 %% from the second parser and discards it.
 %%
 
--spec terminated(scran:parser(), scran:parser()) -> scran:parser().
+-spec terminated(scran:parser(), scran:parser(I, O)) -> scran:parser(I, O).
 
 terminated(First, Second) ->
     fun
@@ -141,8 +145,9 @@ terminated(First, Second) ->
                          input => Input}),
             maybe
                 {SecondInput, FirstResult} ?= First(Input),
-                {Remaining, _} ?= Second(SecondInput),
+                {Remaining, Discarded} ?= Second(SecondInput),
                 ?LOG_DEBUG(#{remaining => Remaining,
+                             discarded => Discarded,
                              result => FirstResult}),
                 {Remaining, FirstResult}
             end
@@ -219,3 +224,80 @@ sequence([Step | Steps], {Input, Results}) ->
 sequence([], {Remainder, Results}) ->
     ?LOG_DEBUG(#{remainder => Remainder, results => Results}),
     {Remainder, lists:reverse(Results)}.
+
+
+%% @doc Zip the result of the first parser with the result of second.
+
+-spec zip(scran:parser(I, K), scran:parser(I, V)) -> scran:parser(I, [{K, V}]).
+
+zip(First, Second) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{first => scran_debug:pp(First),
+                         second => scran_debug:pp(Second),
+                         input => Input}),
+
+            maybe
+                {SecondInput, Keys} ?= (First)(Input),
+                {Remaining, Values} ?= (Second)(SecondInput),
+
+                ?LOG_DEBUG(#{keys => Keys,
+                             remaining => Remaining,
+                             values => Values}),
+
+                try
+                    {Remaining, lists:zip(Keys, Values)}
+
+                catch
+                    error:function_clause ->
+                        nomatch
+                end
+            end
+    end.
+
+
+%% doc Using the result of the first parser to initialise the second parser.
+
+-spec followed_with(scran:parser(), scran:with_result()) -> scran:parser().
+
+followed_with(First, Second) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{first => scran_debug:pp(First),
+                         second => scran_debug:pp(Second),
+                         input => Input}),
+
+            maybe
+                {SecondInput, FirstResult} ?= First(Input),
+                (Second(FirstResult))(SecondInput)
+            end
+    end.
+
+%% @doc Combine the result from second parser initialised with the
+%% result of the first parser.
+
+-spec combined_with(scran:parser(), scran:with_result(), scran:combiner()) -> scran:parser().
+
+combined_with(First, Second, Combiner) ->
+    fun
+        (Input) ->
+            ?LOG_DEBUG(#{first => scran_debug:pp(First),
+                         second => scran_debug:pp(Second),
+                         combiner => scran_debug:pp(Combiner),
+                         input => Input}),
+
+            maybe
+                {SecondInput, FirstResult} ?= First(Input),
+                {Remaining, SecondResult} ?= (Second(FirstResult))(SecondInput),
+                {Remaining, Combiner(FirstResult, SecondResult)}
+            end
+    end.
+
+
+%% @doc Combine using maps:merge/2 the result from second parser
+%% initialised with the result of the first parser.
+
+-spec combined_with(scran:parser(), scran:with_result()) -> scran:parser().
+
+combined_with(First, Second) ->
+    ?FUNCTION_NAME(First, Second, fun maps:merge/2).

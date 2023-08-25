@@ -25,7 +25,7 @@
 
 
 %% @doc Try each alternative parser in turn until one returns other
-%% than nomatch.
+%% than nomatch (or none from optional/conditional parsers).
 
 -spec alt([scran:parser()]) -> scran:parser().
 
@@ -41,10 +41,16 @@ alt(Alternatives) ->
 alt([Alternative | Alternatives], Input) ->
     ?LOG_DEBUG(#{alternative => scran_debug:pp(Alternative),
                  input => Input}),
-    maybe
-        {_, _} ?= Alternative(Input)
+    case Alternative(Input) of
+        {_, none} ->
+            %% condition or optional parser that has returned none,
+            %% continue parseing with remaining alternatives.
+            ?LOG_DEBUG(#{nomatch => scran_debug:pp(Alternative)}),
+            ?FUNCTION_NAME(Alternatives, Input);
 
-    else
+        {_, _} = Result ->
+            Result;
+
         nomatch ->
             ?LOG_DEBUG(#{nomatch => scran_debug:pp(Alternative)}),
             ?FUNCTION_NAME(Alternatives, Input)

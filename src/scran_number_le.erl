@@ -19,6 +19,23 @@
 
 
 -define(ENDIAN, little).
+-export([f/1]).
+-export([f104/0]).
+-export([f112/0]).
+-export([f120/0]).
+-export([f128/0]).
+-export([f16/0]).
+-export([f24/0]).
+-export([f32/0]).
+-export([f40/0]).
+-export([f48/0]).
+-export([f56/0]).
+-export([f64/0]).
+-export([f72/0]).
+-export([f8/0]).
+-export([f80/0]).
+-export([f88/0]).
+-export([f96/0]).
 -export([i/1]).
 -export([i104/0]).
 -export([i112/0]).
@@ -136,3 +153,44 @@ u104() -> u(104).
 u112() -> u(112).
 u120() -> u(120).
 u128() -> u(128).
+
+
+-spec f(scran_number:bit_size()) -> scran_number:fparser().
+
+f(Size) ->
+    scran_number:f(?ENDIAN, Size).
+
+-spec f8() -> scran_number:fparser().
+-spec f16() -> scran_number:fparser().
+-spec f24() -> scran_number:fparser().
+-spec f32() -> scran_number:fparser().
+-spec f40() -> scran_number:fparser().
+-spec f48() -> scran_number:fparser().
+-spec f56() -> scran_number:fparser().
+-spec f64() -> scran_number:fparser().
+-spec f72() -> scran_number:fparser().
+-spec f80() -> scran_number:fparser().
+-spec f88() -> scran_number:fparser().
+-spec f96() -> scran_number:fparser().
+-spec f104() -> scran_number:fparser().
+-spec f112() -> scran_number:fparser().
+-spec f120() -> scran_number:fparser().
+-spec f128() -> scran_number:fparser().
+
+
+f8() -> f(8).
+f16() -> f(16).
+f24() -> f(24).
+f32() -> f(32).
+f40() -> f(40).
+f48() -> f(48).
+f56() -> f(56).
+f64() -> f(64).
+f72() -> f(72).
+f80() -> f(80).
+f88() -> f(88).
+f96() -> f(96).
+f104() -> f(104).
+f112() -> f(112).
+f120() -> f(120).
+f128() -> f(128).

@@ -18,6 +18,9 @@
 -module(scran_result).
 
 
+-feature(maybe_expr, enable).
+
+
 -export([ignore/1]).
 -export([into_atom/1]).
 -export([into_bits/2]).

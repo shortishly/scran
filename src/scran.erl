@@ -19,11 +19,13 @@
 -feature(maybe_expr, enable).
 
 
+-export_type([combiner/0]).
 -export_type([input/0]).
 -export_type([parser/0]).
 -export_type([parser/2]).
 -export_type([result/0]).
 -export_type([result/2]).
+-export_type([with_result/0]).
 -include_lib("kernel/include/logger.hrl").
 
 
@@ -39,3 +41,7 @@
 -type result(I, O) :: {RemainingInput :: I, ProducedOutput :: O}
                     | none
                     | nomatch.
+
+-type with_result() :: fun ((scran:result()) -> scran:parser()).
+
+-type combiner() :: fun ((scran:result(), scran:result()) -> scran:result()).

@@ -197,6 +197,31 @@ alt_test_() ->
        {{"abc", "123456"}, "123456abc"},
        {nomatch, " "}]).
 
+alt_condition_false_test_() ->
+    lists:map(
+      ?T(alt([alpha1(),
+              condition(false, multispace1()),
+              digit1()])),
+      [{{"", "abc"}, "abc"},
+       {{"123", "abc"}, "abc123"},
+       {{<<"123">>, <<"abc">>}, <<"abc123">>},
+       {{"", "123456"}, "123456"},
+       {{"abc", "123456"}, "123456abc"},
+       {nomatch, " "}]).
+
+alt_condition_true_test_() ->
+    lists:map(
+      ?T(alt([alpha1(),
+              condition(true, multispace1()),
+              digit1()])),
+      [{{"", "abc"}, "abc"},
+       {{"123", "abc"}, "abc123"},
+       {{<<"123">>, <<"abc">>}, <<"abc123">>},
+       {{"", "123456"}, "123456"},
+       {{"abc", "123456"}, "123456abc"},
+       {{"", " "}, " "}]).
+
+
 permutation_test_() ->
     lists:map(
       ?T(permutation([alpha1(), digit1()])),
@@ -944,6 +969,108 @@ success_test_() ->
        {{"123", good}, "123"},
        {{<<>>, good}, <<>>},
        {{<<"123">>, good}, <<"123">>}]).
+
+
+zip_test_() ->
+    lists:map(
+      ?T(scran_sequence:zip(alpha1(), digit1())),
+      [{{[], [{$a, $1}, {$b, $2}, {$c, $3}]}, "abc123"},
+       {nomatch, "abc1234"}]).
+
+
+bytes_part_test_() ->
+    lists:map(
+      ?T(scran_bytes:part(2, 3)),
+      [{{<<>>, <<"cde">>}, <<"abcdefgh">>},
+       {nomatch, <<"abcd">>}]).
+
+
+sequence_followed_with_test_() ->
+    lists:map(
+      t(scran_sequence:followed_with(
+          into_tuple(
+            separated_pair(
+              into_atom(alpha1()),
+              tag("="),
+              into_integer(digit1()))),
+          fun
+              ({a, A}) ->
+                  value(A, rest());
+
+              ({b, B}) ->
+                  value(B + 5, rest());
+
+              ({c, _}) ->
+                  scran_character_complete:take(1)
+          end)),
+      [{{"", 3}, "a=3"},
+       {{"", 6}, "b=1"},
+       {{"bc", "a"}, "c=3abc"},
+       {nomatch, "c=3"},
+       {nomatch, ""},
+       {{exception, error, function_clause}, "d=3"}]).
+
+
+sequence_combined_with_test_() ->
+    lists:map(
+      t(scran_sequence:combined_with(
+          into_map(
+            many1(
+              into_tuple(
+                separated_pair(
+                  into_atom(alpha1()),
+                  tag("="),
+                  into_integer(digit1()))))),
+        fun
+            (#{a := 0}) ->
+                preceded(
+                  tag(";"),
+                  into_map(
+                    many1(
+                      into_tuple(
+                        separated_pair(
+                          into_atom(alpha1()),
+                          tag("="),
+                          into_integer(digit1()))))));
+
+            (#{a := 1}) ->
+                preceded(
+                  tag(">"),
+                  into_map(
+                    many1(
+                      into_tuple(
+                        separated_pair(
+                          into_integer(digit1()),
+                          tag("="),
+                          into_atom(alpha1()))))))
+        end)),
+      [{{"abc", #{a => 0, b => 2, f => 9}}, "a=0b=2;f=9abc"},
+       {nomatch, "a=0b=2>f=9abc"},
+       {nomatch, "a=0b=2"},
+       {{"654321", #{a => 1, b => 2, 1 => c}}, "a=1b=2>1=c654321"},
+       {nomatch, ""},
+       {{exception, error, function_clause}, "d=3"}]).
+
+
+t(Parser) ->
+    fun
+        ({{exception, Class, Term}, Input} = Test) ->
+            {nm(Test), ?_assertException(Class, Term, Parser(Input))};
+
+        ({Expected, Input} = Test) ->
+            {nm(Test),
+             ?_assertEqual(
+                Expected,
+                case Parser(Input) of
+                    Expected ->
+                        Expected;
+
+                    Otherwise ->
+                        ?debugVal(Otherwise, -1),
+                        ?debugVal(Input, -1),
+                        Otherwise
+                end)}
+      end.
 
 
 nm(Test) ->
