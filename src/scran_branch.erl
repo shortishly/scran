@@ -44,7 +44,7 @@ alt([Alternative | Alternatives], Input) ->
     case Alternative(Input) of
         {_, none} ->
             %% condition or optional parser that has returned none,
-            %% continue parseing with remaining alternatives.
+            %% continue parsing with remaining alternatives.
             ?LOG_DEBUG(#{nomatch => scran_debug:pp(Alternative)}),
             ?FUNCTION_NAME(Alternatives, Input);
 
