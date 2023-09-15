@@ -26,17 +26,20 @@
 -spec pp(function()) -> io_lib:chars() | binary().
 
 pp(Function) ->
+    {module, M} = erlang:fun_info(Function, module),
     {name, Encoded} = erlang:fun_info(Function, name),
     case  string:split(atom_to_list(Encoded), "/") of
         [[$- | F], _] ->
             {env, Env} = erlang:fun_info(Function, env),
             case erlang:fun_info(Function, arity) of
                 {arity, 0} ->
-                    iolist_to_binary([F, "()"]);
+                    iolist_to_binary([atom_to_list(M), ":", F, "()"]);
 
                 {arity, _} ->
                     iolist_to_binary(
-                      [F,
+                      [atom_to_list(M),
+                       ":",
+                       F,
                        "(",
                        lists:join(", ", mapping(Env)),
                        ")"])
