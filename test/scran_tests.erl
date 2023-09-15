@@ -985,6 +985,77 @@ bytes_part_test_() ->
        {nomatch, <<"abcd">>}]).
 
 
+bytes_bitfield_8bit_test_() ->
+    lists:map(
+      t(scran_bytes:bitfield([a, b, c, d, e, f, g, h])),
+      [{{<<>>,
+         #{a => false,
+           b => false,
+           c => false,
+           d => false,
+           e => false,
+           f => false,
+           g => false,
+           h => false}},
+        <<2#00_00_00_00:8>>},
+
+       {{<<>>,
+         #{a => true,
+           b => false,
+           c => true,
+           d => false,
+           e => false,
+           f => true,
+           g => true,
+           h => false}},
+        <<2#10_10_01_10:8>>}]).
+
+
+bytes_bitfield_16bit_test_() ->
+    lists:map(
+      t(scran_bytes:bitfield([a0, b0, c0, d0, e0, f0, g0, h0,
+                              a1, b1, c1, d1, e1, f1, g1, h1])),
+      [{{<<>>,
+         #{a0 => false,
+           b0 => false,
+           c0 => false,
+           d0 => false,
+           e0 => false,
+           f0 => false,
+           g0 => false,
+           h0 => false,
+
+           a1 => false,
+           b1 => false,
+           c1 => false,
+           d1 => false,
+           e1 => false,
+           f1 => false,
+           g1 => false,
+           h1 => false}},
+        <<2#00_00_00_00_00_00_00_00:16>>},
+
+       {{<<>>,
+         #{a0 => true,
+           b0 => false,
+           c0 => true,
+           d0 => false,
+           e0 => false,
+           f0 => true,
+           g0 => true,
+           h0 => false,
+
+           a1 => true,
+           b1 => true,
+           c1 => false,
+           d1 => true,
+           e1 => true,
+           f1 => false,
+           g1 => false,
+           h1 => true}},
+        <<2#10_10_01_10_11_01_10_01:16>>}]).
+
+
 sequence_followed_with_test_() ->
     lists:map(
       t(scran_sequence:followed_with(
@@ -1066,6 +1137,8 @@ t(Parser) ->
                         Expected;
 
                     Otherwise ->
+                        ?debugVal(Expected, -1),
+                        ?debugVal(scran_debug:pp(Parser), -1),
                         ?debugVal(Otherwise, -1),
                         ?debugVal(Input, -1),
                         Otherwise

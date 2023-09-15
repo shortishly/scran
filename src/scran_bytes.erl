@@ -22,12 +22,19 @@
 -feature(maybe_expr, enable).
 
 
+-export([bitfield/1]).
+-export([bitfield/2]).
 -export([length_encoded/1]).
 -export([null_terminated/0]).
 -export([part/2]).
 -export([split/1]).
 -export([tag/1]).
 -export([take/1]).
+-import(scran_bits, [into_boolean/0]).
+-import(scran_combinator, [map_parser/2]).
+-import(scran_combinator, [map_result/2]).
+-import(scran_multi, [many1/1]).
+-import(scran_result, [into_map/1]).
 -include_lib("kernel/include/logger.hrl").
 
 
@@ -148,4 +155,26 @@ part(Position, Length) ->
                 error:badarg ->
                     nomatch
             end
+    end.
+
+
+%% @doc Given a list of names, return a bitfield.
+-spec bitfield([atom()]) -> scran:parser(scran:input(), #{atom() => binary()}).
+
+bitfield(Names) when length(Names) rem 8 == 0 ->
+    ?FUNCTION_NAME(Names, take(length(Names) div 8)).
+
+
+bitfield(Names, Parser) when length(Names) rem 8 == 0 ->
+    fun
+        (Input) ->
+            (into_map(
+               map_result(
+                 map_parser(
+                   Parser,
+                   many1(into_boolean())),
+                 fun
+                     (Flags) ->
+                         lists:zip(Names, Flags)
+                 end)))(Input)
     end.
