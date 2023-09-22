@@ -546,6 +546,10 @@ i128_little_test_() ->
          -16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d},
         <<-16#1a2b3c4d1a2b3c4d1a2b3c4d1a2b3c4d:128/little>>}]).
 
+u28_little_test_() ->
+    lists:map(
+      ?T(scran_number:u(little, 28)),
+      [{{<<0:4>>, 1}, <<1,0,0,0>>}]).
 
 number_bit_sizes() ->
     [8, 16, 24, 32, 40, 48, 56, 64, 72,
@@ -621,7 +625,13 @@ u(F) ->
                {{<<>>, 1}, bits(Endianess, Size, 1)},
                {{<<>>, 1 bsl Size - 1}, bits(Endianess, Size, 1 bsl Size - 1)},
                {nomatch, <<>>},
-               {nomatch, bits(Endianess, Size + 1, 1)},
+               {case Endianess of
+                    little ->
+                        {<<0:1>>, 1};
+                    big ->
+                        {<<1:1>>, 0}
+                end,
+                bits(Endianess, Size + 1, 1)},
                {nomatch, bits(Endianess, Size - 1, 1)}])
     end.
 
@@ -696,7 +706,13 @@ i(F) ->
                {{<<>>, 1}, bits(Endianess, Size, 1)},
                {{<<>>, 1 bsl (Size - 1) - 1}, bits(Endianess, Size, 1 bsl (Size - 1) - 1)},
                {nomatch, <<>>},
-               {nomatch, bits(Endianess, Size + 1, 1)},
+               {case Endianess of
+                    little ->
+                        {<<0:1>>, 1};
+                    big ->
+                        {<<1:1>>, 0}
+                end,
+                bits(Endianess, Size + 1, 1)},
                {nomatch, bits(Endianess, Size - 1, 1)}])
     end.
 

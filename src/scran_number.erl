@@ -274,7 +274,7 @@ u(Endianess, Size) -> int(Endianess, unsigned, Size).
 
 int(little, signed, Size) ->
     fun
-        (<<I:Size/little-signed, Remaining/bytes>>) ->
+        (<<I:Size/little-signed, Remaining/bits>>) ->
             {Remaining, I};
 
         (L) when is_list(L), length(L) * 8 >= Size ->
@@ -288,7 +288,7 @@ int(little, signed, Size) ->
 
 int(little, unsigned, Size) ->
     fun
-        (<<I:Size/little, Remaining/bytes>>) ->
+        (<<I:Size/little, Remaining/bits>>) ->
             {Remaining, I};
 
         (L) when is_list(L), length(L) * 8 >= Size ->
@@ -302,7 +302,7 @@ int(little, unsigned, Size) ->
 
 int(big, signed, Size) ->
     fun
-        (<<I:Size/signed, Remaining/bytes>>) ->
+        (<<I:Size/signed, Remaining/bits>>) ->
             {Remaining, I};
 
         (L) when is_list(L), length(L) * 8 >= Size ->
@@ -316,7 +316,7 @@ int(big, signed, Size) ->
 
 int(big, unsigned, Size) ->
     fun
-        (<<I:Size, Remaining/bytes>>) ->
+        (<<I:Size, Remaining/bits>>) ->
             {Remaining, I};
 
         (L) when is_list(L), length(L) * 8 >= Size ->
@@ -400,7 +400,7 @@ f128(Endianess) -> f(Endianess, 128).
 
 f(little, Size) ->
     fun
-        (<<I:Size/float-little, Remaining/bytes>>) ->
+        (<<I:Size/float-little, Remaining/bits>>) ->
             {Remaining, I};
 
         (L) when is_list(L), length(L) * 8 >= Size ->
@@ -414,7 +414,7 @@ f(little, Size) ->
 
 f(big, Size) ->
     fun
-        (<<I:Size/float, Remaining/bytes>>) ->
+        (<<I:Size/float, Remaining/bits>>) ->
             {Remaining, I};
 
         (L) when is_list(L), length(L) * 8 >= Size ->

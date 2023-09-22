@@ -1,6 +1,6 @@
 {application, 'scran', [
 	{description, "Parser Combinators"},
-	{vsn, "0.1.0-2-g151b383"},
+	{vsn, "0.1.0-6-gb7bd8da"},
 	{modules, ['scran','scran_bits','scran_branch','scran_bytes','scran_character_complete','scran_combinator','scran_debug','scran_multi','scran_number','scran_number_be','scran_number_le','scran_result','scran_sequence']},
 	{registered, []},
 	{applications, [kernel,stdlib]},
