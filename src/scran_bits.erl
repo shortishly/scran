@@ -20,12 +20,14 @@
 
 -export([into_boolean/0]).
 -export([tag/1]).
+-export([take/1]).
+-include_lib("kernel/include/logger.hrl").
 
 
 %% @doc Takes 1 bit from the input converting it into a boolean.
 %% @returns A tuple of the remaining input and a boolean result.
 
--spec into_boolean() -> scran:parser(<<_:1, _:_*1>>, boolean()).
+-spec into_boolean() -> scran:parser(<<_:_*1>>, boolean()).
 
 into_boolean() ->
     fun
@@ -42,7 +44,7 @@ into_boolean() ->
 
 %% @doc Return the matching input.
 
--spec tag(bitstring()) -> scran:parser().
+-spec tag(bitstring()) -> scran:parser(<<_:_*1>>, <<_:_*1>>).
 
 tag(Tag) ->
     fun
@@ -51,5 +53,21 @@ tag(Tag) ->
             {Remaining, Tag};
 
         (_) ->
+            nomatch
+    end.
+
+
+take(N) when is_integer(N), N >= 0 ->
+    ?LOG_DEBUG(#{n => N}),
+    fun
+        (<<Taken:N/bits, Remaining/bits>>) ->
+            ?LOG_DEBUG(#{n => N,
+                         taken => Taken,
+                         remaining => Remaining}),
+
+            {Remaining, Taken};
+
+        (Otherwise) ->
+            ?LOG_DEBUG(#{nomatch => Otherwise, n => N}),
             nomatch
     end.

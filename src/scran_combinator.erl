@@ -24,6 +24,7 @@
 -export([condition/2]).
 -export([condition/3]).
 -export([eof/0]).
+-export([failure/0]).
 -export([ignore_result/1]).
 -export([is_not/1]).
 -export([map_parser/2]).
@@ -273,4 +274,15 @@ success(Result) ->
     fun
         (Input) ->
             {Input, Result}
+    end.
+
+
+%% @doc A parser which always fails without consuming any input.
+
+-spec failure() -> scran:parser().
+
+failure() ->
+    fun
+        (_) ->
+            nomatch
     end.
