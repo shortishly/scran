@@ -42,6 +42,6 @@
                     | none
                     | nomatch.
 
--type with_result() :: fun ((scran:result()) -> scran:parser()).
+-type with_result() :: fun ((any()) -> scran:parser()).
 
--type combiner() :: fun ((scran:result(), scran:result()) -> scran:result()).
+-type combiner() :: fun ((any(), any()) -> scran:result()).

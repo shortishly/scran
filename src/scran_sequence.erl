@@ -275,8 +275,8 @@ followed_with(First, Second) ->
 
 %% @doc Combine the result from second parser initialised with the
 %% result of the first parser.
-
--spec combined_with(scran:parser(), scran:with_result(), scran:combiner()) -> scran:parser().
+%%
+%% -spec combined_with(scran:parser(), scran:with_result(), scran:combiner()) -> scran:parser().
 
 combined_with(First, Second, Combiner) ->
     fun
@@ -296,8 +296,8 @@ combined_with(First, Second, Combiner) ->
 
 %% @doc Combine using maps:merge/2 the result from second parser
 %% initialised with the result of the first parser.
-
--spec combined_with(scran:parser(), scran:with_result()) -> scran:parser().
+%%
+%% -spec combined_with(scran:parser(), scran:with_result()) -> scran:parser().
 
 combined_with(First, Second) ->
     ?FUNCTION_NAME(First, Second, fun maps:merge/2).
